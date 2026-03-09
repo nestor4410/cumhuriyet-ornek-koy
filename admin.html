@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yönetim Paneli | Cumhuriyet Örnek Köy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f1f5f9;--surface:#ffffff;--text:#0f172a;--text-sec:#64748b;
+  --accent:#3b82f6;--accent-dark:#1d4ed8;--accent-light:#dbeafe;--accent-bg:#eff6ff;
+  --border:#e2e8f0;--dark-bg:#0f172a;--dark-surface:#1e293b;--dark-text:#f1f5f9;--dark-sec:#94a3b8;
+  --green:#10b981;--green-light:#d1fae5;--red:#ef4444;--red-light:#fee2e2;
+  --yellow:#f59e0b;--yellow-light:#fef3c7;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.05);--shadow-md:0 4px 20px rgba(0,0,0,0.07);--shadow-lg:0 12px 40px rgba(0,0,0,0.1);
+  --radius:12px;--radius-sm:8px;--radius-lg:16px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--accent-light);border-radius:3px}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit}
+
+/* ═══ LOGIN SCREEN ═══ */
+.login-screen{position:fixed;inset:0;z-index:9999;background:var(--dark-bg);display:flex;align-items:center;justify-content:center;transition:opacity .5s,visibility .5s}
+.login-screen.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.login-box{background:var(--dark-surface);border-radius:var(--radius-lg);padding:48px 40px;width:min(90vw,380px);text-align:center}
+.login-box h2{font-size:1.4rem;font-weight:700;color:var(--dark-text);margin-bottom:6px}
+.login-box p{font-size:.82rem;color:var(--dark-sec);margin-bottom:28px}
+.login-input{width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);border-radius:var(--radius-sm);padding:12px 16px;font-family:inherit;font-size:.9rem;color:var(--dark-text);outline:none;transition:border-color .3s;margin-bottom:16px;text-align:center;letter-spacing:.1em}
+.login-input::placeholder{color:var(--dark-sec)}
+.login-input:focus{border-color:var(--accent)}
+.login-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:12px;font-size:.88rem;font-weight:600;cursor:pointer;transition:background .2s}
+.login-btn:hover{background:var(--accent-dark)}
+.login-error{font-size:.78rem;color:var(--red);margin-top:12px;display:none}
+
+/* ═══ ADMIN LAYOUT ═══ */
+.admin-layout{display:none;min-height:100vh}
+.admin-layout.visible{display:flex}
+
+/* SIDEBAR */
+.sidebar{width:240px;background:var(--dark-bg);min-height:100vh;padding:24px 0;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sb-brand{padding:0 24px 24px;font-size:.9rem;font-weight:700;color:var(--dark-text)}
+.sb-brand small{display:block;font-size:.68rem;font-weight:400;color:var(--dark-sec);margin-top:2px;letter-spacing:.06em;text-transform:uppercase}
+.sb-nav{list-style:none}
+.sb-nav li{position:relative}
+.sb-nav a{display:flex;align-items:center;gap:12px;padding:11px 24px;font-size:.82rem;font-weight:500;color:var(--dark-sec);transition:all .2s;cursor:pointer}
+.sb-nav a:hover{color:var(--dark-text);background:rgba(255,255,255,.04)}
+.sb-nav a.active{color:var(--accent-light);background:rgba(59,130,246,.08)}
+.sb-nav a.active::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;background:var(--accent);border-radius:0 2px 2px 0}
+.sb-nav a svg{width:18px;height:18px;flex-shrink:0;opacity:.6}
+.sb-nav a.active svg{opacity:1}
+.sb-badge{background:var(--accent);color:#fff;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:auto}
+.sb-divider{height:1px;background:rgba(255,255,255,.06);margin:12px 24px}
+.sb-footer{position:absolute;bottom:16px;left:0;right:0;padding:0 24px}
+.sb-footer a{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--dark-sec);transition:color .2s}
+.sb-footer a:hover{color:var(--red)}
+.sb-footer svg{width:16px;height:16px}
+
+/* MAIN */
+.main-content{margin-left:240px;flex:1;min-height:100vh;padding:32px 40px}
+.main-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
+.main-header h1{font-size:1.5rem;font-weight:700;letter-spacing:-.01em}
+.main-header .site-link{font-size:.78rem;font-weight:500;color:var(--accent);display:flex;align-items:center;gap:4px;transition:color .2s}
+.main-header .site-link:hover{color:var(--accent-dark)}
+.main-header .site-link svg{width:14px;height:14px}
+
+/* PANELS */
+.panel{display:none}
+.panel.active{display:block}
+
+/* CARDS */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:32px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:box-shadow .2s}
+.stat-card:hover{box-shadow:var(--shadow-md)}
+.sc-label{font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-sec);margin-bottom:8px}
+.sc-value{font-size:1.8rem;font-weight:700;color:var(--text);line-height:1}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.data-table th{background:var(--bg);font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-sec);padding:12px 16px;text-align:left;border-bottom:1px solid var(--border)}
+.data-table td{font-size:.85rem;color:var(--text);padding:14px 16px;border-bottom:1px solid var(--border);vertical-align:top}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--accent-bg)}
+
+/* FORM ELEMENTS */
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-sec);margin-bottom:6px}
+.form-input{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-family:inherit;font-size:.88rem;color:var(--text);outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--accent)}
+.form-textarea{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-family:inherit;font-size:.88rem;color:var(--text);outline:none;resize:vertical;min-height:100px;transition:border-color .2s}
+.form-textarea:focus{border-color:var(--accent)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:var(--radius-sm);font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;border:none}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-dark)}
+.btn-danger{background:var(--red);color:#fff}.btn-danger:hover{background:#dc2626}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text-sec)}.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-sm{padding:5px 12px;font-size:.75rem}
+.btn svg{width:14px;height:14px}
+
+/* BADGES */
+.badge{display:inline-block;font-size:.68rem;font-weight:600;padding:3px 8px;border-radius:10px}
+.badge-green{background:var(--green-light);color:#065f46}
+.badge-yellow{background:var(--yellow-light);color:#92400e}
+.badge-red{background:var(--red-light);color:#991b1b}
+
+/* SECTION TITLE */
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.section-head h2{font-size:1.1rem;font-weight:700}
+
+/* PHOTO GRID ADMIN */
+.photo-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.pa-item{position:relative;aspect-ratio:4/3;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);cursor:pointer;transition:box-shadow .2s}
+.pa-item:hover{box-shadow:var(--shadow-md)}
+.pa-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.pa-placeholder span{font-size:.7rem;color:rgba(255,255,255,.3);letter-spacing:.08em;text-transform:uppercase;text-align:center}
+.pa-item img{width:100%;height:100%;object-fit:cover}
+.pa-overlay{position:absolute;inset:0;background:rgba(15,23,42,.7);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;opacity:0;transition:opacity .25s}
+.pa-item:hover .pa-overlay{opacity:1}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(15,23,42,.6);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all .3s}
+.modal-overlay.open{opacity:1;visibility:visible}
+.modal-box{background:var(--surface);border-radius:var(--radius-lg);width:min(92vw,560px);max-height:85vh;overflow-y:auto;animation:modalIn .3s ease;padding:32px}
+@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-title{font-size:1.2rem;font-weight:700;margin-bottom:20px}
+.modal-actions{display:flex;gap:10px;margin-top:24px;justify-content:flex-end}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--dark-bg);color:var(--dark-text);padding:14px 24px;border-radius:var(--radius-sm);font-size:.85rem;font-weight:500;z-index:600;transform:translateY(100px);opacity:0;transition:all .4s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:48px 24px;color:var(--text-sec)}
+.empty-state svg{width:48px;height:48px;opacity:.3;margin-bottom:12px}
+.empty-state p{font-size:.88rem}
+
+/* UPLOAD AREA */
+.upload-area{border:2px dashed var(--border);border-radius:var(--radius);padding:32px;text-align:center;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.upload-area:hover,.upload-area.dragover{border-color:var(--accent);background:var(--accent-bg)}
+.upload-area svg{width:36px;height:36px;color:var(--text-sec);margin-bottom:8px;opacity:.5}
+.upload-area p{font-size:.85rem;color:var(--text-sec);margin-bottom:4px}
+.upload-area small{font-size:.72rem;color:var(--text-sec);opacity:.6}
+.upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-preview{margin-top:16px;border-radius:var(--radius-sm);overflow:hidden;position:relative;display:none}
+.upload-preview img{width:100%;max-height:240px;object-fit:cover;display:block}
+.upload-preview .remove-preview{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;border:none;width:28px;height:28px;border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.upload-preview .remove-preview:hover{background:var(--red)}
+
+/* CONTENT EDITOR */
+.ce-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px}
+.ce-section h3{font-size:.88rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.ce-section h3 svg{width:16px;height:16px;color:var(--accent)}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{width:60px;padding:16px 0}
+  .sb-brand{padding:0 12px 16px;font-size:0}
+  .sb-brand small{font-size:0}
+  .sb-nav a span,.sb-badge{display:none}
+  .sb-nav a{padding:12px;justify-content:center}
+  .sb-nav a.active::before{display:none}
+  .sb-footer{display:none}
+  .main-content{margin-left:60px;padding:24px 20px}
+  .stat-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h2>Yönetim Paneli</h2>
+    <p>Cumhuriyet Örnek Köy</p>
+    <input class="login-input" type="password" id="loginPass" placeholder="Parola" autocomplete="off">
+    <button class="login-btn" onclick="tryLogin()">Giriş Yap</button>
+    <div class="login-error" id="loginError">Parola yanlış, tekrar deneyin.</div>
+  </div>
+</div>
+
+<!-- ADMIN LAYOUT -->
+<div class="admin-layout" id="adminLayout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-brand">Yönetim<small>Admin Paneli</small></div>
+    <ul class="sb-nav">
+      <li><a class="active" data-panel="dashboard" onclick="switchPanel('dashboard',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span>Genel Bakış</span>
+      </a></li>
+      <li><a data-panel="selamlar" onclick="switchPanel('selamlar',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <span>Selamlar</span>
+        <span class="sb-badge" id="greetingBadge">0</span>
+      </a></li>
+      <li><a data-panel="photos" onclick="switchPanel('photos',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        <span>Fotoğraflar</span>
+      </a></li>
+      <li><a data-panel="news" onclick="switchPanel('news',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
+        <span>Haberler</span>
+      </a></li>
+      <li><a data-panel="timeline" onclick="switchPanel('timeline',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <span>Zaman Çizelgesi</span>
+      </a></li>
+      <div class="sb-divider"></div>
+      <li><a data-panel="content" onclick="switchPanel('content',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <span>İçerik Düzenle</span>
+      </a></li>
+      <li><a data-panel="settings" onclick="switchPanel('settings',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <span>Ayarlar</span>
+      </a></li>
+    </ul>
+    <div class="sb-footer">
+      <a href="#" onclick="logout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Çıkış Yap
+      </a>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="main-header">
+      <h1 id="panelTitle">Genel Bakış</h1>
+      <a href="index.html" class="site-link" target="_blank">
+        Siteyi Görüntüle
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="stat-grid" id="dashStats"></div>
+      <div class="section-head"><h2>Son Selamlar</h2></div>
+      <div id="dashRecentGreetings"></div>
+    </div>
+
+    <!-- SELAMLAR -->
+    <div class="panel" id="panel-selamlar">
+      <div class="section-head">
+        <h2>Tüm Selamlar</h2>
+      </div>
+      <div id="greetingTable"></div>
+    </div>
+
+    <!-- PHOTOS -->
+    <div class="panel" id="panel-photos">
+      <div class="section-head">
+        <h2>Fotoğraf Yönetimi</h2>
+        <button class="btn btn-primary" onclick="openPhotoModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Fotoğraf Ekle
+        </button>
+      </div>
+      <div class="photo-admin-grid" id="photoAdminGrid"></div>
+    </div>
+
+    <!-- NEWS -->
+    <div class="panel" id="panel-news">
+      <div class="section-head">
+        <h2>Haberler</h2>
+        <button class="btn btn-primary" onclick="openNewsModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Haber Ekle
+        </button>
+      </div>
+      <div id="newsTable"></div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="panel" id="panel-timeline">
+      <div class="section-head">
+        <h2>Zaman Çizelgesi</h2>
+        <button class="btn btn-primary" onclick="openTimelineModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Öğe Ekle
+        </button>
+      </div>
+      <div id="timelineTable"></div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="panel" id="panel-content">
+      <div class="section-head"><h2>Site İçeriğini Düzenle</h2></div>
+      <div id="contentEditor"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="panel" id="panel-settings">
+      <div class="section-head"><h2>Ayarlar</h2></div>
+      <div class="ce-section">
+        <h3>Parola Değiştir</h3>
+        <div class="form-group">
+          <label>Mevcut Parola</label>
+          <input class="form-input" type="password" id="oldPass">
+        </div>
+        <div class="form-group">
+          <label>Yeni Parola</label>
+          <input class="form-input" type="password" id="newPass">
+        </div>
+        <div class="form-group">
+          <label>Yeni Parola (Tekrar)</label>
+          <input class="form-input" type="password" id="newPass2">
+        </div>
+        <button class="btn btn-primary" onclick="changePassword()">Parolayı Değiştir</button>
+      </div>
+      <div class="ce-section">
+        <h3>Verileri Sıfırla</h3>
+        <p style="font-size:.85rem;color:var(--text-sec);margin-bottom:16px">Tüm verileri varsayılan durumuna sıfırlar. Bu işlem geri alınamaz.</p>
+        <button class="btn btn-danger" onclick="resetAllData()">Tüm Verileri Sıfırla</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="photoModal">
+  <div class="modal-box" id="photoModalBox"></div>
+</div>
+<div class="modal-overlay" id="newsModal">
+  <div class="modal-box" id="newsModalBox"></div>
+</div>
+<div class="modal-overlay" id="timelineModal">
+  <div class="modal-box" id="timelineModalBox"></div>
+</div>
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box" id="confirmModalBox"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════ DATA ═══════════ */
+const DATA_KEY='cok_site';
+function getDefaultData(){
+  return {
+    photos:[
+      {id:1,src:'',gradient:'linear-gradient(135deg,#1e3c72,#2a5298,#4facfe)',title:'Köy Meydanı',caption:'Köyün kalbi, meydandır.'},
+      {id:2,src:'',gradient:'linear-gradient(135deg,#0f2027,#203a43,#2c5364)',title:'Tarla Manzarası',caption:'Bereketli topraklar, verimli hasatlar.'},
+      {id:3,src:'',gradient:'linear-gradient(135deg,#134e5e,#71b280)',title:'Köy Camii',caption:'Köyümüzün tarihi camii.'},
+      {id:4,src:'',gradient:'linear-gradient(135deg,#0c3547,#1a6b8a,#2d9cdb)',title:'İlkokul',caption:'Köy ilkokulu, nesillerin yetiştiği yer.'},
+      {id:5,src:'',gradient:'linear-gradient(135deg,#1a2a6c,#2a5298,#4facfe)',title:'Hasat Dönemi',caption:'Yaz hasadı, köyün en coşkulu zamanı.'},
+      {id:6,src:'',gradient:'linear-gradient(135deg,#0f2027,#2c5364,#134e5e)',title:'Köy Çeşmesi',caption:'Eski köy çeşmesi hala ayakta.'},
+      {id:7,src:'',gradient:'linear-gradient(135deg,#1e3c72,#4facfe)',title:'Kış Manzarası',caption:'Kar altında Cumhuriyet Örnek Köy.'},
+      {id:8,src:'',gradient:'linear-gradient(135deg,#134e5e,#0f2027)',title:'Bağlar',caption:'Köyün üzüm bağları.'},
+      {id:9,src:'',gradient:'linear-gradient(135deg,#2a5298,#0c3547)',title:'Gün Batımı',caption:'Köy üzerinde bir gün batımı.'}
+    ],
+    greetings:[
+      {id:1,name:'Ahmet Kaya',city:'İstanbul',message:'O çınar ağacının altındaki sohbetleri hiç unutmadım. Yaz tatilinde mutlaka geliyorum, herkese selamlar!',timestamp:'2025-06-07T14:32:11',approved:true},
+      {id:2,name:'Fatma Demir',city:'Ankara',message:'Annemin yaptığı tutmaç çorbasını hiçbir restoranda bulamadım. Köyün kokusu başka.',timestamp:'2025-06-04T09:15:47',approved:true},
+      {id:3,name:'Mehmet Yılmaz',city:'Almanya',message:'30 yıldır her bayramı düşünürüm. Bu yıl mutlaka geleceğim, söz.',timestamp:'2025-05-28T21:03:59',approved:true}
+    ],
+    news:[
+      {id:1,title:'Organik tarım sertifikası alındı',summary:'İl Tarım Müdürlüğü denetimlerinin ardından köy resmi organik tarım belgesini aldı.',date:'2025-06-08'},
+      {id:2,title:'Yeni asfalt yol teslim edildi',summary:'Köyü ilçeye bağlayan yol projesi tamamlandı.',date:'2025-06-01'},
+      {id:3,title:'İlk buğday hasadı başladı',summary:'Erken gelen sıcaklar hasat takvimini öne aldırdı.',date:'2025-05-22'},
+      {id:4,title:'Kütüphane yenilendi',summary:'Bağışlarla desteklenen kütüphane yeniden düzenlendi.',date:'2025-05-14'}
+    ],
+    content:{
+      siteName:'Cumhuriyet Örnek Köy',
+      heroSmall:'Anadolu\'nun bağrında',
+      heroTitle:'Cumhuriyet<br><span>Örnek Köy</span>',
+      heroSub:'Cumhuriyetle kurulan, toprakla büyüyen bir köy.',
+      koyTitle:'Toprakta kök, <em>gönülde yuva.</em>',
+      koyText:'<p>Cumhuriyet Örnek Köy, adını ve ruhunu <strong>Türkiye Cumhuriyeti\'nin kuruluşundan</strong> alır. "Örnek" kelimesi tesadüf değil; köy, Atatürk\'ün model köy vizyonu çerçevesinde kurulan yerleşim birimlerinden biridir.</p><p>Tarih boyunca <strong>buğday tarlalarında, bağ bahçelerde, çarşamba pazarlarında</strong> büyüyen bir topluluktur burası. Her evin bir hikayesi, her sokağın bir adı vardır.</p><p>Şehre gidenler döner, dönmeyenler özlem duyar. Bu köy, bir coğrafyadan çok bir aidiyettir.</p>',
+      ataturkQuote:'"Köylü milletin efendisidir."',
+      ataturkText:'Köyümüz, Cumhuriyet\'in ilk yıllarında Atatürk\'ün "model köy" projesi kapsamında kurulan yerleşim birimlerinden biridir. Adındaki "Örnek" sözcüğü, yeni Türkiye\'nin tarımda, eğitimde ve kalkınmada öncü olacak köylere verilen unvandır.\n\nTemelleri atılan köyümüz, ilk köy okulunu, ilk kooperatifi ve ilk köy demirbaşını bu topraklarda kurdu.',
+      selamTitle:'Uzaktaysan bile <em>burada bir yerin var.</em>',
+      selamText:'Şehirlere, ülkelerin dört bir yanına dağılan köylülerimiz için bu köşe her zaman açık. Selam bırak, anını yaz, köyden uzakta da bağını koru.',
+      contactEmail:'iletisim@ornekkov.tr',
+      ataturkPhotoFile:'',
+      ataturkPhotoSrc:'',
+      ataturkPhotos:[],
+      menuKoyumuz:'Köyümüz',
+      menuAtaturk:'Atatürk Köşesi',
+      menuSelamlar:'Selamlar',
+      menuFotograflar:'Fotoğraflar',
+      btnGaleri:'Fotoğrafları Keşfet',
+      btnSubmitPhoto:'Fotoğraf Gönder',
+      btnSend:'Gönder',
+      btnSeeAll:'Tüm selamları gör',
+      googleFormsUrl:''
+    },
+    timeline:[
+      {id:1,year:'1923',title:'Cumhuriyet Köyü Kuruldu',desc:'Türkiye Cumhuriyeti ile birlikte köy resmi statü kazandı.'},
+      {id:2,year:'1927',title:'İlk Okul Açıldı',desc:'Köy çocukları artık kendi köylerinde okuyabiliyordu.'},
+      {id:3,year:'1935',title:'Tarım Kooperatifi Kuruldu',desc:'Çiftçiler birlikte güçlendi.'},
+      {id:4,year:'1950',title:'İlk Traktör Geldi',desc:'Motorlu tarım köyde başladı.'},
+      {id:5,year:'1970',title:'Elektrik Bağlandı',desc:'Köy elektriklendi, yeni bir çağ başladı.'},
+      {id:6,year:'2025',title:'Bu Sayfa Açıldı',desc:'Köyümüz dijitalde de yaşıyor.'}
+    ],
+    adminHash:btoa('cumhuriyet2025')
+  };
+}
+function loadData(){try{const d=localStorage.getItem(DATA_KEY);return d?JSON.parse(d):null;}catch(e){return null;}}
+function saveData(d){localStorage.setItem(DATA_KEY,JSON.stringify(d));}
+function getData(){let d=loadData();if(!d){d=getDefaultData();saveData(d);}var c=d.content;if(!c.ataturkPhotoFile&&c.ataturkPhotoFile!=='')c.ataturkPhotoFile='';if(!c.ataturkPhotoSrc&&c.ataturkPhotoSrc!=='')c.ataturkPhotoSrc='';if(!c.menuKoyumuz)c.menuKoyumuz='Köyümüz';if(!c.menuAtaturk)c.menuAtaturk='Atatürk Köşesi';if(!c.menuSelamlar)c.menuSelamlar='Selamlar';if(!c.menuFotograflar)c.menuFotograflar='Fotoğraflar';if(!c.btnGaleri)c.btnGaleri='Fotoğrafları Keşfet';if(!c.btnSubmitPhoto)c.btnSubmitPhoto='Fotoğraf Gönder';if(!c.btnSend)c.btnSend='Gönder';if(!c.btnSeeAll)c.btnSeeAll='Tüm selamları gör';if(c.googleFormsUrl===undefined)c.googleFormsUrl='';if(!c.ataturkPhotos){c.ataturkPhotos=[];if(c.ataturkPhotoFile)c.ataturkPhotos.push({id:1,file:c.ataturkPhotoFile,src:''});else if(c.ataturkPhotoSrc)c.ataturkPhotos.push({id:1,file:'',src:c.ataturkPhotoSrc});}saveData(d);return d;}
+function escapeHtml(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
+
+let data=getData();
+const months=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+function formatDate(ts){
+  const d=new Date(ts);
+  const pad=n=>String(n).padStart(2,'0');
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/* ═══════════ LOGIN ═══════════ */
+let isLoggedIn=false;
+const loginScreen=document.getElementById('loginScreen');
+const adminLayout=document.getElementById('adminLayout');
+
+function tryLogin(){
+  const pass=document.getElementById('loginPass').value;
+  if(btoa(pass)===data.adminHash){
+    isLoggedIn=true;
+    loginScreen.classList.add('hidden');
+    adminLayout.classList.add('visible');
+    renderDashboard();
+  }else{
+    document.getElementById('loginError').style.display='block';
+    document.getElementById('loginPass').value='';
+    document.getElementById('loginPass').focus();
+  }
+}
+document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
+
+function logout(){
+  isLoggedIn=false;
+  loginScreen.classList.remove('hidden');
+  adminLayout.classList.remove('visible');
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginError').style.display='none';
+}
+
+/* ═══════════ PANELS ═══════════ */
+const panelTitles={dashboard:'Genel Bakış',selamlar:'Selamlar',photos:'Fotoğraf Yönetimi',news:'Haberler',timeline:'Zaman Çizelgesi',content:'İçerik Düzenle',settings:'Ayarlar'};
+
+function switchPanel(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.querySelectorAll('.sb-nav a').forEach(a=>a.classList.remove('active'));
+  if(el)el.classList.add('active');
+  document.getElementById('panelTitle').textContent=panelTitles[id]||id;
+  if(id==='dashboard')renderDashboard();
+  if(id==='selamlar')renderGreetings();
+  if(id==='photos')renderPhotos();
+  if(id==='news')renderNews();
+  if(id==='timeline')renderTimeline();
+  if(id==='content')renderContentEditor();
+}
+
+/* ═══════════ DASHBOARD ═══════════ */
+function renderDashboard(){
+  const stats=document.getElementById('dashStats');
+  stats.innerHTML=`
+    <div class="stat-card"><div class="sc-label">Toplam Selam</div><div class="sc-value">${data.greetings.length}</div></div>
+    <div class="stat-card"><div class="sc-label">Fotoğraf</div><div class="sc-value">${data.photos.length}</div></div>
+    <div class="stat-card"><div class="sc-label">Haber</div><div class="sc-value">${data.news.length}</div></div>
+    <div class="stat-card"><div class="sc-label">Tarih Öğesi</div><div class="sc-value">${data.timeline.length}</div></div>
+  `;
+  document.getElementById('greetingBadge').textContent=data.greetings.length;
+
+  const recent=document.getElementById('dashRecentGreetings');
+  const sorted=data.greetings.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)).slice(0,5);
+  if(sorted.length===0){
+    recent.innerHTML='<div class="empty-state"><p>Henüz selam yok.</p></div>';
+    return;
+  }
+  let html='<table class="data-table"><thead><tr><th>Kişi</th><th>Mesaj</th><th>Tarih</th><th>Durum</th></tr></thead><tbody>';
+  sorted.forEach(g=>{
+    html+=`<tr><td><strong>${escapeHtml(g.name)}</strong><br><span style="font-size:.75rem;color:var(--text-sec)">${escapeHtml(g.city)}</span></td><td style="max-width:280px">${escapeHtml(g.message).substring(0,80)}${g.message.length>80?'...':''}</td><td style="font-size:.78rem;white-space:nowrap">${formatDate(g.timestamp)}</td><td>${g.approved?'<span class="badge badge-green">Onaylı</span>':'<span class="badge badge-yellow">Bekliyor</span>'}</td></tr>`;
+  });
+  html+='</tbody></table>';
+  recent.innerHTML=html;
+}
+
+/* ═══════════ GREETINGS ═══════════ */
+function renderGreetings(){
+  const container=document.getElementById('greetingTable');
+  const sorted=data.greetings.sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+  if(sorted.length===0){
+    container.innerHTML='<div class="empty-state"><p>Henüz selam yok.</p></div>';
+    return;
+  }
+  let html='<table class="data-table"><thead><tr><th>Kişi</th><th>Şehir</th><th>Mesaj</th><th>Tarih</th><th>Durum</th><th style="width:120px">İşlemler</th></tr></thead><tbody>';
+  sorted.forEach(g=>{
+    html+=`<tr>
+      <td><strong>${escapeHtml(g.name)}</strong></td>
+      <td>${escapeHtml(g.city)}</td>
+      <td style="max-width:240px;font-size:.82rem">${escapeHtml(g.message)}</td>
+      <td style="font-size:.75rem;white-space:nowrap">${formatDate(g.timestamp)}</td>
+      <td>${g.approved?'<span class="badge badge-green">Onaylı</span>':'<span class="badge badge-yellow">Bekliyor</span>'}</td>
+      <td>
+        ${!g.approved?`<button class="btn btn-sm btn-ghost" onclick="approveGreeting(${g.id})">Onayla</button>`:''}
+        <button class="btn btn-sm btn-danger" onclick="confirmDelete('greeting',${g.id})">Sil</button>
+      </td>
+    </tr>`;
+  });
+  html+='</tbody></table>';
+  container.innerHTML=html;
+}
+
+function approveGreeting(id){
+  const g=data.greetings.find(x=>x.id===id);
+  if(g){g.approved=true;saveData(data);renderGreetings();showToast('Selam onaylandı.');}
+}
+
+/* ═══════════ PHOTOS ═══════════ */
+
+function renderPhotos(){
+  const grid=document.getElementById('photoAdminGrid');
+  grid.innerHTML='';
+  data.photos.forEach(p=>{
+    const div=document.createElement('div');
+    div.className='pa-item';
+    div.id='photo-item-'+p.id;
+    div.innerHTML=`<div class="pa-placeholder" style="background:${p.gradient||'linear-gradient(135deg,#1e3c72,#4facfe)'}"><span>${escapeHtml(p.title)}</span></div>`;
+    div.innerHTML+=`<div class="pa-overlay">
+      <button class="btn btn-sm btn-ghost" style="color:#fff;border-color:rgba(255,255,255,.3)" onclick="openPhotoModal(${p.id})">Düzenle</button>
+      <button class="btn btn-sm btn-danger" onclick="confirmDelete('photo',${p.id})">Sil</button>
+    </div>`;
+    grid.appendChild(div);
+    if(p.file){
+      resolvePhotoUrl(p.file).then(url=>{
+        if(url){
+          const overlay=div.querySelector('.pa-overlay').outerHTML;
+          div.innerHTML=`<img src="${url}" alt="${escapeHtml(p.title)}">`+overlay;
+        }
+      });
+    }else if(p.src){
+      const overlay=div.querySelector('.pa-overlay').outerHTML;
+      div.innerHTML=`<img src="${escapeHtml(p.src)}" alt="${escapeHtml(p.title)}">`+overlay;
+    }
+  });
+}
+
+let pendingFile=null;
+let pendingPreviewUrl='';
+
+function openPhotoModal(editId){
+  const p=editId?data.photos.find(x=>x.id===editId):null;
+  pendingFile=null;
+  pendingPreviewUrl='';
+  const box=document.getElementById('photoModalBox');
+
+  function buildModal(previewSrc){
+    const hasImage=!!previewSrc;
+    box.innerHTML=`
+      <div class="modal-title">${p?'Fotoğraf Düzenle':'Yeni Fotoğraf Ekle'}</div>
+      <div class="form-group"><label>Başlık</label><input class="form-input" id="pTitle" value="${p?escapeHtml(p.title):''}"></div>
+      <div class="form-group"><label>Açıklama</label><input class="form-input" id="pCaption" value="${p?escapeHtml(p.caption):''}"></div>
+      <div class="form-group">
+        <label>Fotoğraf</label>
+        <div class="upload-area" id="uploadArea"${hasImage?' style="display:none"':''}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p>Bilgisayarınızdan fotoğraf seçin veya sürükleyin</p>
+          <small>JPG, PNG, WebP (orijinal kalite korunur)</small>
+          <input type="file" id="pFileInput" accept="image/jpeg,image/png,image/webp" onchange="handlePhotoFile(this)">
+        </div>
+        <div class="upload-preview" id="uploadPreview"${hasImage?' style="display:block"':''}>
+          <img id="previewImg" ${hasImage?`src="${previewSrc}"`:''}>
+          <button class="remove-preview" onclick="removePreview()">&times;</button>
+        </div>
+        ${hasImage&&p&&p.file?`<p style="font-size:.72rem;color:var(--text-sec);margin-top:6px">Dosya: ${escapeHtml(p.file)}</p>`:''}
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('photoModal')">İptal</button>
+        <button class="btn btn-primary" onclick="savePhoto(${editId||'null'})">${p?'Kaydet':'Ekle'}</button>
+      </div>
+    `;
+    const area=document.getElementById('uploadArea');
+    area.addEventListener('dragover',e=>{e.preventDefault();area.classList.add('dragover');});
+    area.addEventListener('dragleave',()=>area.classList.remove('dragover'));
+    area.addEventListener('drop',e=>{e.preventDefault();area.classList.remove('dragover');if(e.dataTransfer.files.length)processFile(e.dataTransfer.files[0]);});
+  }
+
+  openModal('photoModal');
+  if(p&&p.file){
+    resolvePhotoUrl(p.file).then(url=>buildModal(url||''));
+  }else if(p&&p.src){
+    buildModal(p.src);
+  }else{
+    buildModal('');
+  }
+}
+
+function handlePhotoFile(input){if(input.files&&input.files[0])processFile(input.files[0]);}
+
+function processFile(file){
+  if(!file.type.match(/image\/(jpeg|png|webp)/)){showToast('Yalnızca JPG, PNG veya WebP dosyaları.');return;}
+  pendingFile=file;
+  pendingPreviewUrl=URL.createObjectURL(file);
+  const preview=document.getElementById('uploadPreview');
+  const img=document.getElementById('previewImg');
+  img.src=pendingPreviewUrl;
+  preview.style.display='block';
+  document.getElementById('uploadArea').style.display='none';
+}
+
+function removePreview(){
+  pendingFile=null;
+  if(pendingPreviewUrl){URL.revokeObjectURL(pendingPreviewUrl);pendingPreviewUrl='';}
+  document.getElementById('uploadPreview').style.display='none';
+  document.getElementById('uploadArea').style.display='block';
+  document.getElementById('pFileInput').value='';
+}
+
+function savePhoto(editId){
+  const title=document.getElementById('pTitle').value.trim();
+  const caption=document.getElementById('pCaption').value.trim();
+  if(!title){showToast('Başlık gerekli.');return;}
+
+  if(pendingFile){
+    const ext=pendingFile.name.split('.').pop().toLowerCase();
+    const fileName=Date.now()+'_'+title.replace(/[^a-zA-Z0-9ğüşıöçĞÜŞİÖÇ]/g,'_').substring(0,30)+'.'+ext;
+
+    /* Save file reference, the actual file lives in photos/ folder.
+       User copies files there manually or via the download prompt. */
+    const reader=new FileReader();
+    reader.onload=function(e){
+      /* Store in IndexedDB for full quality, localStorage only holds metadata */
+      storePhotoBlob(fileName,pendingFile).then(()=>{
+        if(editId){
+          const p=data.photos.find(x=>x.id===editId);
+          if(p){p.title=title;p.caption=caption;p.file=fileName;p.src='';}
+        }else{
+          data.photos.push({id:Date.now(),src:'',file:fileName,gradient:'linear-gradient(135deg,#1e3c72,#4facfe)',title,caption});
+        }
+        saveData(data);closeModal('photoModal');renderPhotos();
+        showToast('Fotoğraf kaydedildi (orijinal kalite).');
+        pendingFile=null;pendingPreviewUrl='';
+      });
+    };
+    reader.readAsArrayBuffer(pendingFile);
+  }else{
+    if(editId){
+      const p=data.photos.find(x=>x.id===editId);
+      if(p){p.title=title;p.caption=caption;}
+    }else{
+      data.photos.push({id:Date.now(),src:'',file:'',gradient:'linear-gradient(135deg,#1e3c72,#4facfe)',title,caption});
+    }
+    saveData(data);closeModal('photoModal');renderPhotos();showToast('Kaydedildi.');
+  }
+}
+
+/* ═══════════ INDEXEDDB PHOTO STORAGE ═══════════ */
+const DB_NAME='cok_photos';
+const DB_VER=1;
+const STORE_NAME='photos';
+
+function openPhotoDB(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(DB_NAME,DB_VER);
+    req.onupgradeneeded=e=>{e.target.result.createObjectStore(STORE_NAME);};
+    req.onsuccess=e=>resolve(e.target.result);
+    req.onerror=e=>reject(e.target.error);
+  });
+}
+
+function storePhotoBlob(name,file){
+  return openPhotoDB().then(db=>{
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction(STORE_NAME,'readwrite');
+      tx.objectStore(STORE_NAME).put(file,name);
+      tx.oncomplete=()=>resolve();
+      tx.onerror=e=>reject(e.target.error);
+    });
+  });
+}
+
+function getPhotoBlob(name){
+  return openPhotoDB().then(db=>{
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction(STORE_NAME,'readonly');
+      const req=tx.objectStore(STORE_NAME).get(name);
+      req.onsuccess=()=>resolve(req.result||null);
+      req.onerror=e=>reject(e.target.error);
+    });
+  });
+}
+
+function deletePhotoBlob(name){
+  return openPhotoDB().then(db=>{
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction(STORE_NAME,'readwrite');
+      tx.objectStore(STORE_NAME).delete(name);
+      tx.oncomplete=()=>resolve();
+      tx.onerror=e=>reject(e.target.error);
+    });
+  });
+}
+
+const _blobUrlCache={};
+function resolvePhotoUrl(fileName){
+  if(_blobUrlCache[fileName])return Promise.resolve(_blobUrlCache[fileName]);
+  return getPhotoBlob(fileName).then(blob=>{
+    if(!blob)return '';
+    const url=URL.createObjectURL(blob instanceof Blob?blob:new Blob([blob]));
+    _blobUrlCache[fileName]=url;
+    return url;
+  }).catch(()=>'');
+}
+
+/* ═══════════ NEWS ═══════════ */
+function renderNews(){
+  const container=document.getElementById('newsTable');
+  const sorted=data.news.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if(sorted.length===0){
+    container.innerHTML='<div class="empty-state"><p>Henüz haber yok.</p></div>';
+    return;
+  }
+  let html='<table class="data-table"><thead><tr><th>Başlık</th><th>Özet</th><th>Tarih</th><th style="width:120px">İşlemler</th></tr></thead><tbody>';
+  sorted.forEach(n=>{
+    html+=`<tr>
+      <td><strong>${escapeHtml(n.title)}</strong></td>
+      <td style="font-size:.82rem;max-width:300px">${escapeHtml(n.summary)}</td>
+      <td style="font-size:.78rem;white-space:nowrap">${n.date}</td>
+      <td>
+        <button class="btn btn-sm btn-ghost" onclick="openNewsModal(${n.id})">Düzenle</button>
+        <button class="btn btn-sm btn-danger" onclick="confirmDelete('news',${n.id})">Sil</button>
+      </td>
+    </tr>`;
+  });
+  html+='</tbody></table>';
+  container.innerHTML=html;
+}
+
+function openNewsModal(editId){
+  const n=editId?data.news.find(x=>x.id===editId):null;
+  const box=document.getElementById('newsModalBox');
+  box.innerHTML=`
+    <div class="modal-title">${n?'Haber Düzenle':'Yeni Haber Ekle'}</div>
+    <div class="form-group"><label>Başlık</label><input class="form-input" id="nTitle" value="${n?escapeHtml(n.title):''}"></div>
+    <div class="form-group"><label>Özet</label><textarea class="form-textarea" id="nSummary">${n?escapeHtml(n.summary):''}</textarea></div>
+    <div class="form-group"><label>Tarih</label><input class="form-input" type="date" id="nDate" value="${n?n.date:new Date().toISOString().split('T')[0]}"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('newsModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveNews(${editId||'null'})">${n?'Kaydet':'Ekle'}</button>
+    </div>
+  `;
+  openModal('newsModal');
+}
+
+function saveNews(editId){
+  const title=document.getElementById('nTitle').value.trim();
+  const summary=document.getElementById('nSummary').value.trim();
+  const date=document.getElementById('nDate').value;
+  if(!title){showToast('Başlık gerekli.');return;}
+  if(editId){
+    const n=data.news.find(x=>x.id===editId);
+    if(n){n.title=title;n.summary=summary;n.date=date;}
+  }else{
+    data.news.push({id:Date.now(),title,summary,date});
+  }
+  saveData(data);closeModal('newsModal');renderNews();showToast('Haber kaydedildi.');
+}
+
+/* ═══════════ TIMELINE ═══════════ */
+function renderTimeline(){
+  const container=document.getElementById('timelineTable');
+  const sorted=data.timeline.sort((a,b)=>parseInt(a.year)-parseInt(b.year));
+  if(sorted.length===0){
+    container.innerHTML='<div class="empty-state"><p>Zaman çizelgesi boş.</p></div>';
+    return;
+  }
+  let html='<table class="data-table"><thead><tr><th>Yıl</th><th>Başlık</th><th>Açıklama</th><th style="width:120px">İşlemler</th></tr></thead><tbody>';
+  sorted.forEach(t=>{
+    html+=`<tr>
+      <td><strong>${escapeHtml(t.year)}</strong></td>
+      <td>${escapeHtml(t.title)}</td>
+      <td style="font-size:.82rem">${escapeHtml(t.desc)}</td>
+      <td>
+        <button class="btn btn-sm btn-ghost" onclick="openTimelineModal(${t.id})">Düzenle</button>
+        <button class="btn btn-sm btn-danger" onclick="confirmDelete('timeline',${t.id})">Sil</button>
+      </td>
+    </tr>`;
+  });
+  html+='</tbody></table>';
+  container.innerHTML=html;
+}
+
+function openTimelineModal(editId){
+  const t=editId?data.timeline.find(x=>x.id===editId):null;
+  const box=document.getElementById('timelineModalBox');
+  box.innerHTML=`
+    <div class="modal-title">${t?'Öğe Düzenle':'Yeni Öğe Ekle'}</div>
+    <div class="form-group"><label>Yıl</label><input class="form-input" id="tYear" value="${t?escapeHtml(t.year):''}"></div>
+    <div class="form-group"><label>Başlık</label><input class="form-input" id="tTitle" value="${t?escapeHtml(t.title):''}"></div>
+    <div class="form-group"><label>Açıklama</label><textarea class="form-textarea" id="tDesc">${t?escapeHtml(t.desc):''}</textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('timelineModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveTimeline(${editId||'null'})">${t?'Kaydet':'Ekle'}</button>
+    </div>
+  `;
+  openModal('timelineModal');
+}
+
+function saveTimeline(editId){
+  const year=document.getElementById('tYear').value.trim();
+  const title=document.getElementById('tTitle').value.trim();
+  const desc=document.getElementById('tDesc').value.trim();
+  if(!year||!title){showToast('Yıl ve başlık gerekli.');return;}
+  if(editId){
+    const t=data.timeline.find(x=>x.id===editId);
+    if(t){t.year=year;t.title=title;t.desc=desc;}
+  }else{
+    data.timeline.push({id:Date.now(),year,title,desc});
+  }
+  saveData(data);closeModal('timelineModal');renderTimeline();showToast('Kaydedildi.');
+}
+
+/* ═══════════ CONTENT EDITOR ═══════════ */
+function renderContentEditor(){
+  const c=data.content;
+  const el=document.getElementById('contentEditor');
+  el.innerHTML=`
+    <div class="ce-section">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg> Genel</h3>
+      <div class="form-group"><label>Site Adı</label><input class="form-input" id="cSiteName" value="${escapeHtml(c.siteName)}"></div>
+      <div class="form-group"><label>İletişim Email</label><input class="form-input" id="cEmail" value="${escapeHtml(c.contactEmail)}"></div>
+    </div>
+    <div class="ce-section">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg> Menü Adları</h3>
+      <div class="form-group"><label>Köyümüz</label><input class="form-input" id="cMenuKoyumuz" value="${escapeHtml(c.menuKoyumuz||'Köyümüz')}"></div>
+      <div class="form-group"><label>Atatürk Köşesi</label><input class="form-input" id="cMenuAtaturk" value="${escapeHtml(c.menuAtaturk||'Atatürk Köşesi')}"></div>
+      <div class="form-group"><label>Selamlar</label><input class="form-input" id="cMenuSelamlar" value="${escapeHtml(c.menuSelamlar||'Selamlar')}"></div>
+      <div class="form-group"><label>Fotoğraflar</label><input class="form-input" id="cMenuFotograflar" value="${escapeHtml(c.menuFotograflar||'Fotoğraflar')}"></div>
+    </div>
+    <div class="ce-section">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12h6M12 9v6"/></svg> Buton Adları</h3>
+      <div class="form-group"><label>Galeri Butonu</label><input class="form-input" id="cBtnGaleri" value="${escapeHtml(c.btnGaleri||'Fotoğrafları Keşfet')}"></div>
+      <div class="form-group"><label>Fotoğraf Gönder Butonu</label><input class="form-input" id="cBtnSubmitPhoto" value="${escapeHtml(c.btnSubmitPhoto||'Fotoğraf Gönder')}"></div>
+      <div class="form-group"><label>Gönder Butonu</label><input class="form-input" id="cBtnSend" value="${escapeHtml(c.btnSend||'Gönder')}"></div>
+      <div class="form-group"><label>Tüm Selamları Gör</label><input class="form-input" id="cBtnSeeAll" value="${escapeHtml(c.btnSeeAll||'Tüm selamları gör')}"></div>
+    </div>
+    <div class="ce-section">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg> Bağlantılar</h3>
+      <div class="form-group"><label>Google Forms URL (Fotoğraf Gönder)</label><input class="form-input" id="cGoogleFormsUrl" value="${escapeHtml(c.googleFormsUrl||'')}" placeholder="https://docs.google.com/forms/..."></div>
+    </div>
+    <div class="ce-section">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg> Hero Alanı</h3>
+      <div class="form-group"><label>Üst Yazı</label><input class="form-input" id="cHeroSmall" value="${escapeHtml(c.heroSmall)}"></div>
+      <div class="form-group"><label>Ana Başlık (HTML)</label><input class="form-input" id="cHeroTitle" value="${escapeHtml(c.heroTitle)}"></div>
+      <div class="form-group"><label>Alt Yazı</label><input class="form-input" id="cHeroSub" value="${escapeHtml(c.heroSub)}"></div>
+    </div>
+    <div class="ce-section">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg> Köyümüz Bölümü</h3>
+      <div class="form-group"><label>Başlık (HTML)</label><input class="form-input" id="cKoyTitle" value="${escapeHtml(c.koyTitle)}"></div>
+      <div class="form-group"><label>İçerik (HTML)</label><textarea class="form-textarea" style="min-height:160px" id="cKoyText">${escapeHtml(c.koyText)}</textarea></div>
+    </div>
+    <div class="ce-section">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> Atatürk Köşesi</h3>
+      <div class="form-group"><label>Alıntı</label><input class="form-input" id="cAtQuote" value="${escapeHtml(c.ataturkQuote)}"></div>
+      <div class="form-group"><label>Metin</label><textarea class="form-textarea" style="min-height:120px" id="cAtText">${escapeHtml(c.ataturkText)}</textarea></div>
+      <div class="form-group">
+        <label>Atatürk Fotoğrafları (Bölüm Arkaplanı)</label>
+        <p style="font-size:.78rem;color:var(--text-sec);margin-bottom:12px">Birden fazla fotoğraf ekleyebilirsiniz. Fotoğraflar arkaplanda geçişli gösterilir.</p>
+        <div id="atPhotosGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:12px"></div>
+        <label class="btn btn-ghost" style="cursor:pointer;margin:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg> Fotoğraf Ekle<input type="file" accept="image/*" multiple style="display:none" onchange="handleAtaturkPhotos(this)"></label>
+      </div>
+    </div>
+    <div class="ce-section">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Selamlar Bölümü</h3>
+      <div class="form-group"><label>Başlık (HTML)</label><input class="form-input" id="cSelamTitle" value="${escapeHtml(c.selamTitle)}"></div>
+      <div class="form-group"><label>Açıklama</label><textarea class="form-textarea" id="cSelamText">${escapeHtml(c.selamText)}</textarea></div>
+    </div>
+    <div style="margin-top:16px">
+      <button class="btn btn-primary" onclick="saveContent()">Tüm Değişiklikleri Kaydet</button>
+    </div>
+  `;
+  renderAtaturkPhotosGrid();
+}
+
+function saveContent(){
+  data.content.siteName=document.getElementById('cSiteName').value;
+  data.content.contactEmail=document.getElementById('cEmail').value;
+  data.content.heroSmall=document.getElementById('cHeroSmall').value;
+  data.content.heroTitle=document.getElementById('cHeroTitle').value;
+  data.content.heroSub=document.getElementById('cHeroSub').value;
+  data.content.koyTitle=document.getElementById('cKoyTitle').value;
+  data.content.koyText=document.getElementById('cKoyText').value;
+  data.content.ataturkQuote=document.getElementById('cAtQuote').value;
+  data.content.ataturkText=document.getElementById('cAtText').value;
+  data.content.selamTitle=document.getElementById('cSelamTitle').value;
+  data.content.selamText=document.getElementById('cSelamText').value;
+  data.content.menuKoyumuz=document.getElementById('cMenuKoyumuz').value;
+  data.content.menuAtaturk=document.getElementById('cMenuAtaturk').value;
+  data.content.menuSelamlar=document.getElementById('cMenuSelamlar').value;
+  data.content.menuFotograflar=document.getElementById('cMenuFotograflar').value;
+  data.content.btnGaleri=document.getElementById('cBtnGaleri').value;
+  data.content.btnSubmitPhoto=document.getElementById('cBtnSubmitPhoto').value;
+  data.content.btnSend=document.getElementById('cBtnSend').value;
+  data.content.btnSeeAll=document.getElementById('cBtnSeeAll').value;
+  data.content.googleFormsUrl=document.getElementById('cGoogleFormsUrl').value;
+  saveData(data);
+  showToast('İçerik kaydedildi. Sitedeki değişiklikler sayfayı yenilediğinizde görünür.');
+}
+
+/* ═══════════ ATATÜRK PHOTOS (MULTI) ═══════════ */
+function handleAtaturkPhotos(input){
+  var files=input.files;
+  if(!files||!files.length)return;
+  var promises=[];
+  for(var i=0;i<files.length;i++){
+    (function(file){
+      var fileName='ataturk_'+Date.now()+'_'+Math.random().toString(36).substr(2,6)+'_'+file.name.replace(/[^a-zA-Z0-9._-]/g,'');
+      promises.push(storePhotoBlob(fileName,file).then(function(){
+        if(!data.content.ataturkPhotos)data.content.ataturkPhotos=[];
+        data.content.ataturkPhotos.push({id:Date.now()+Math.random(),file:fileName,src:''});
+      }));
+    })(files[i]);
+  }
+  Promise.all(promises).then(function(){
+    saveData(data);
+    renderAtaturkPhotosGrid();
+    showToast(files.length+' fotoğraf eklendi.');
+  }).catch(function(){showToast('Bazı fotoğraflar yüklenemedi.');});
+  input.value='';
+}
+
+function removeAtaturkPhotoById(id){
+  var arr=data.content.ataturkPhotos||[];
+  var found=arr.find(function(p){return p.id===id;});
+  if(found&&found.file)deletePhotoBlob(found.file).catch(function(){});
+  data.content.ataturkPhotos=arr.filter(function(p){return p.id!==id;});
+  saveData(data);
+  renderAtaturkPhotosGrid();
+  showToast('Fotoğraf kaldırıldı.');
+}
+
+function renderAtaturkPhotosGrid(){
+  var grid=document.getElementById('atPhotosGrid');
+  if(!grid)return;
+  var arr=data.content.ataturkPhotos||[];
+  grid.innerHTML='';
+  if(arr.length===0){grid.innerHTML='<span style="font-size:.82rem;color:var(--text-sec)">Henüz fotoğraf eklenmedi</span>';return;}
+  arr.forEach(function(p){
+    var div=document.createElement('div');
+    div.style.cssText='position:relative;aspect-ratio:4/3;border-radius:8px;overflow:hidden;border:1px solid var(--border);background:#1e293b';
+    div.innerHTML='<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:rgba(255,255,255,.3)">Yükleniyor...</span>';
+    var removeBtn=document.createElement('button');
+    removeBtn.style.cssText='position:absolute;top:4px;right:4px;background:rgba(239,68,68,.85);color:#fff;border:none;width:22px;height:22px;border-radius:50%;font-size:.8rem;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center';
+    removeBtn.textContent='×';
+    removeBtn.onclick=(function(pid){return function(){removeAtaturkPhotoById(pid);};})(p.id);
+    div.appendChild(removeBtn);
+    grid.appendChild(div);
+    function showImg(url){
+      if(!url)return;
+      var img=document.createElement('img');
+      img.src=url;img.alt='Atatürk';img.style.cssText='width:100%;height:100%;object-fit:cover;position:absolute;inset:0';
+      div.appendChild(img);
+    }
+    if(p.file){resolvePhotoUrl(p.file).then(showImg);}
+    else if(p.src){showImg(p.src);}
+  });
+}
+
+/* Legacy single photo handlers (kept for compatibility) */
+function handleAtaturkPhoto(input){
+  var file=input.files&&input.files[0];
+  if(!file)return;
+  var fileName='ataturk_'+Date.now()+'_'+file.name.replace(/[^a-zA-Z0-9._-]/g,'');
+  storePhotoBlob(fileName,file).then(function(){
+    if(data.content.ataturkPhotoFile){
+      deletePhotoBlob(data.content.ataturkPhotoFile).catch(function(){});
+    }
+    data.content.ataturkPhotoFile=fileName;
+    data.content.ataturkPhotoSrc='';
+    saveData(data);
+    showToast('Atatürk fotoğrafı yüklendi.');
+  }).catch(function(){
+    showToast('Fotoğraf yüklenirken hata oluştu.');
+  });
+  input.value='';
+}
+
+function removeAtaturkPhoto(){
+  if(data.content.ataturkPhotoFile){
+    deletePhotoBlob(data.content.ataturkPhotoFile).catch(function(){});
+  }
+  data.content.ataturkPhotoFile='';
+  data.content.ataturkPhotoSrc='';
+  saveData(data);
+  saveData(data);
+  showToast('Atatürk fotoğrafı kaldırıldı.');
+}
+
+/* ═══════════ SETTINGS ═══════════ */
+function changePassword(){
+  const old=document.getElementById('oldPass').value;
+  const n1=document.getElementById('newPass').value;
+  const n2=document.getElementById('newPass2').value;
+  if(btoa(old)!==data.adminHash){showToast('Mevcut parola yanlış.');return;}
+  if(n1.length<4){showToast('Yeni parola en az 4 karakter olmalı.');return;}
+  if(n1!==n2){showToast('Parolalar eşleşmiyor.');return;}
+  data.adminHash=btoa(n1);
+  saveData(data);
+  document.getElementById('oldPass').value='';
+  document.getElementById('newPass').value='';
+  document.getElementById('newPass2').value='';
+  showToast('Parola değiştirildi.');
+}
+
+function resetAllData(){
+  confirmAction('Tüm veriler sıfırlansın mı? Bu işlem geri alınamaz.',()=>{
+    localStorage.removeItem(DATA_KEY);
+    data=getDefaultData();
+    saveData(data);
+    renderDashboard();
+    showToast('Veriler sıfırlandı.');
+    switchPanel('dashboard',document.querySelector('[data-panel="dashboard"]'));
+  });
+}
+
+/* ═══════════ CONFIRM / DELETE ═══════════ */
+function confirmAction(message,onConfirm){
+  const box=document.getElementById('confirmModalBox');
+  box.innerHTML=`
+    <div class="modal-title">Emin misiniz?</div>
+    <p style="font-size:.88rem;color:var(--text-sec);margin-bottom:8px">${escapeHtml(message)}</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('confirmModal')">Vazgeç</button>
+      <button class="btn btn-danger" id="confirmBtn">Evet, Sil</button>
+    </div>
+  `;
+  openModal('confirmModal');
+  document.getElementById('confirmBtn').onclick=()=>{closeModal('confirmModal');onConfirm();};
+}
+
+function confirmDelete(type,id){
+  const msg={greeting:'Bu selam silinsin mi?',photo:'Bu fotoğraf silinsin mi?',news:'Bu haber silinsin mi?',timeline:'Bu öğe silinsin mi?'}[type];
+  confirmAction(msg,()=>{
+    if(type==='greeting'){data.greetings=data.greetings.filter(x=>x.id!==id);saveData(data);renderGreetings();}
+    if(type==='photo'){
+      const p=data.photos.find(x=>x.id===id);
+      if(p&&p.file)deletePhotoBlob(p.file).catch(()=>{});
+      data.photos=data.photos.filter(x=>x.id!==id);saveData(data);renderPhotos();
+    }
+    if(type==='news'){data.news=data.news.filter(x=>x.id!==id);saveData(data);renderNews();}
+    if(type==='timeline'){data.timeline=data.timeline.filter(x=>x.id!==id);saveData(data);renderTimeline();}
+    showToast('Silindi.');
+  });
+}
+
+/* ═══════════ MODAL UTILS ═══════════ */
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+});
+
+/* ═══════════ TOAST ═══════════ */
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+</script>
+</body>
+</html>
