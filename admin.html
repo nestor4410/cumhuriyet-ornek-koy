@@ -392,7 +392,9 @@ function getDefaultData(){
       btnSubmitPhoto:'Fotoğraf Gönder',
       btnSend:'Gönder',
       btnSeeAll:'Tüm selamları gör',
-      googleFormsUrl:''
+      googleFormsUrl:'',
+      siteLocation:'Malatya, Yeşilyurt',
+      ataturkPhotoOpacity:15
     },
     timeline:[
       {id:1,year:'1923',title:'Cumhuriyet Köyü Kuruldu',desc:'Türkiye Cumhuriyeti ile birlikte köy resmi statü kazandı.'},
@@ -407,7 +409,7 @@ function getDefaultData(){
 }
 function loadData(){try{const d=localStorage.getItem(DATA_KEY);return d?JSON.parse(d):null;}catch(e){return null;}}
 function saveData(d){localStorage.setItem(DATA_KEY,JSON.stringify(d));}
-function getData(){let d=loadData();if(!d){d=getDefaultData();saveData(d);}var c=d.content;if(!c.ataturkPhotoFile&&c.ataturkPhotoFile!=='')c.ataturkPhotoFile='';if(!c.ataturkPhotoSrc&&c.ataturkPhotoSrc!=='')c.ataturkPhotoSrc='';if(!c.menuKoyumuz)c.menuKoyumuz='Köyümüz';if(!c.menuAtaturk)c.menuAtaturk='Atatürk Köşesi';if(!c.menuSelamlar)c.menuSelamlar='Selamlar';if(!c.menuFotograflar)c.menuFotograflar='Fotoğraflar';if(!c.btnGaleri)c.btnGaleri='Fotoğrafları Keşfet';if(!c.btnSubmitPhoto)c.btnSubmitPhoto='Fotoğraf Gönder';if(!c.btnSend)c.btnSend='Gönder';if(!c.btnSeeAll)c.btnSeeAll='Tüm selamları gör';if(c.googleFormsUrl===undefined)c.googleFormsUrl='';if(!c.ataturkPhotos){c.ataturkPhotos=[];if(c.ataturkPhotoFile)c.ataturkPhotos.push({id:1,file:c.ataturkPhotoFile,src:''});else if(c.ataturkPhotoSrc)c.ataturkPhotos.push({id:1,file:'',src:c.ataturkPhotoSrc});}saveData(d);return d;}
+function getData(){let d=loadData();if(!d){d=getDefaultData();saveData(d);}var c=d.content;if(!c.ataturkPhotoFile&&c.ataturkPhotoFile!=='')c.ataturkPhotoFile='';if(!c.ataturkPhotoSrc&&c.ataturkPhotoSrc!=='')c.ataturkPhotoSrc='';if(!c.menuKoyumuz)c.menuKoyumuz='Köyümüz';if(!c.menuAtaturk)c.menuAtaturk='Atatürk Köşesi';if(!c.menuSelamlar)c.menuSelamlar='Selamlar';if(!c.menuFotograflar)c.menuFotograflar='Fotoğraflar';if(!c.btnGaleri)c.btnGaleri='Fotoğrafları Keşfet';if(!c.btnSubmitPhoto)c.btnSubmitPhoto='Fotoğraf Gönder';if(!c.btnSend)c.btnSend='Gönder';if(!c.btnSeeAll)c.btnSeeAll='Tüm selamları gör';if(c.googleFormsUrl===undefined)c.googleFormsUrl='';if(!c.ataturkPhotos){c.ataturkPhotos=[];if(c.ataturkPhotoFile)c.ataturkPhotos.push({id:1,file:c.ataturkPhotoFile,src:''});else if(c.ataturkPhotoSrc)c.ataturkPhotos.push({id:1,file:'',src:c.ataturkPhotoSrc});}if(c.siteLocation===undefined)c.siteLocation='Malatya, Yeşilyurt';if(c.ataturkPhotoOpacity===undefined)c.ataturkPhotoOpacity=15;saveData(d);return d;}
 function escapeHtml(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
 
 let data=getData();
@@ -831,6 +833,7 @@ function renderContentEditor(){
     <div class="ce-section">
       <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg> Genel</h3>
       <div class="form-group"><label>Site Adı</label><input class="form-input" id="cSiteName" value="${escapeHtml(c.siteName)}"></div>
+      <div class="form-group"><label>Konum (Hero Alt Yazı)</label><input class="form-input" id="cSiteLocation" value="${escapeHtml(c.siteLocation||'')}" placeholder="Malatya, Yeşilyurt"></div>
       <div class="form-group"><label>İletişim Email</label><input class="form-input" id="cEmail" value="${escapeHtml(c.contactEmail)}"></div>
     </div>
     <div class="ce-section">
@@ -867,6 +870,11 @@ function renderContentEditor(){
       <div class="form-group"><label>Alıntı</label><input class="form-input" id="cAtQuote" value="${escapeHtml(c.ataturkQuote)}"></div>
       <div class="form-group"><label>Metin</label><textarea class="form-textarea" style="min-height:120px" id="cAtText">${escapeHtml(c.ataturkText)}</textarea></div>
       <div class="form-group">
+        <label>Fotoğraf Saydamlığı (Arkaplan): <span id="opacityVal">${c.ataturkPhotoOpacity||15}%</span></label>
+        <input type="range" min="5" max="60" step="1" id="cAtOpacity" value="${c.ataturkPhotoOpacity||15}" style="width:100%;accent-color:var(--accent);margin-top:4px" oninput="document.getElementById('opacityVal').textContent=this.value+'%'">
+        <p style="font-size:.72rem;color:var(--text-sec);margin-top:4px">Düşük = daha şeffaf, yüksek = daha belirgin</p>
+      </div>
+      <div class="form-group">
         <label>Atatürk Fotoğrafları (Bölüm Arkaplanı)</label>
         <p style="font-size:.78rem;color:var(--text-sec);margin-bottom:12px">Birden fazla fotoğraf ekleyebilirsiniz. Fotoğraflar arkaplanda geçişli gösterilir.</p>
         <div id="atPhotosGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:12px"></div>
@@ -887,6 +895,7 @@ function renderContentEditor(){
 
 function saveContent(){
   data.content.siteName=document.getElementById('cSiteName').value;
+  data.content.siteLocation=document.getElementById('cSiteLocation').value;
   data.content.contactEmail=document.getElementById('cEmail').value;
   data.content.heroSmall=document.getElementById('cHeroSmall').value;
   data.content.heroTitle=document.getElementById('cHeroTitle').value;
@@ -895,6 +904,7 @@ function saveContent(){
   data.content.koyText=document.getElementById('cKoyText').value;
   data.content.ataturkQuote=document.getElementById('cAtQuote').value;
   data.content.ataturkText=document.getElementById('cAtText').value;
+  data.content.ataturkPhotoOpacity=parseInt(document.getElementById('cAtOpacity').value)||15;
   data.content.selamTitle=document.getElementById('cSelamTitle').value;
   data.content.selamText=document.getElementById('cSelamText').value;
   data.content.menuKoyumuz=document.getElementById('cMenuKoyumuz').value;

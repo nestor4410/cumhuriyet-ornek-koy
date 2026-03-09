@@ -40,14 +40,18 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:14px 48px;background
 .nav-back{display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:500;color:var(--text-sec);transition:color .2s}
 .nav-back:hover{color:var(--accent)}
 .nav-back svg{width:18px;height:18px}
-.theme-toggle{background:var(--accent-bg);border:1px solid var(--border);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;padding:0;flex-shrink:0}
-.theme-toggle:hover{transform:scale(1.1)}
-.theme-toggle svg{width:16px;height:16px;color:var(--text-sec)}
-.theme-toggle .t-sun{display:none}
-.theme-toggle .t-moon{display:block}
-[data-theme="dark"] .theme-toggle .t-sun{display:block}
-[data-theme="dark"] .theme-toggle .t-moon{display:none}
-[data-theme="dark"] .theme-toggle{background:rgba(59,130,246,.1);border-color:var(--border)}
+.theme-switch{position:relative;width:44px;height:24px;flex-shrink:0;cursor:pointer}
+.theme-switch input{display:none}
+.theme-slider{position:absolute;inset:0;background:var(--border);border:1px solid var(--border);border-radius:12px;transition:all .35s}
+.theme-slider::before{content:'';position:absolute;left:2px;top:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:all .35s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.theme-switch input:checked+.theme-slider{background:var(--accent);border-color:var(--accent)}
+.theme-switch input:checked+.theme-slider::before{transform:translateX(20px)}
+.theme-switch-icons{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 5px;pointer-events:none}
+.theme-switch-icons svg{width:12px;height:12px}
+.ts-sun{color:#f59e0b;opacity:0;transition:opacity .3s}
+.ts-moon{color:var(--text-sec);opacity:1;transition:opacity .3s}
+[data-theme="dark"] .ts-sun{opacity:1}
+[data-theme="dark"] .ts-moon{opacity:0}
 
 /* HEADER */
 .page-header{padding:120px 48px 48px;max-width:1200px;margin:0 auto}
@@ -96,7 +100,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:14px 48px;background
 .lightbox.fullscreen{background:rgba(0,0,0,1)}
 .lightbox.fullscreen .lb-image{max-width:100vw;max-height:100vh;border-radius:0}
 .lightbox.fullscreen .lb-image-wrap{border-radius:0}
-.lightbox.fullscreen .lb-info{display:none}
+.lightbox.fullscreen .lb-info{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:10px 20px;border-radius:8px;white-space:nowrap}
 .lightbox.fullscreen .lb-toolbar{top:16px;right:16px}
 .lightbox.fullscreen .lb-prev{left:16px}
 .lightbox.fullscreen .lb-next{right:16px}
@@ -130,10 +134,14 @@ footer{background:var(--surface);color:var(--text-sec);text-align:center;padding
     Ana Sayfa
   </a>
   <div class="nav-right">
-    <button class="theme-toggle" id="themeToggle" aria-label="Tema Değiştir">
-      <svg class="t-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-      <svg class="t-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-    </button>
+    <label class="theme-switch" aria-label="Tema Değiştir">
+      <input type="checkbox" id="themeCheck">
+      <span class="theme-slider"></span>
+      <span class="theme-switch-icons">
+        <svg class="ts-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="ts-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </span>
+    </label>
     <span class="nav-brand">Cumhuriyet Örnek Köy</span>
   </div>
 </nav>
@@ -270,7 +278,7 @@ function lbPrev(){lbIndex=(lbIndex-1+photos.length)%photos.length;lbResetZoom();
 function lbNext(){lbIndex=(lbIndex+1)%photos.length;lbResetZoom();renderLb();}
 
 function lbZoomIn(){lbZoom=Math.min(lbZoom+0.5,5);applyZoom();}
-function lbZoomOut(){lbZoom=Math.max(lbZoom-0.5,0.5);if(lbZoom<=1){lbPanX=0;lbPanY=0;}applyZoom();}
+function lbZoomOut(){lbZoom=Math.max(lbZoom-0.5,1);if(lbZoom<=1){lbPanX=0;lbPanY=0;}applyZoom();}
 function lbResetZoom(){lbZoom=1;lbPanX=0;lbPanY=0;applyZoom();}
 function applyZoom(){
   var img=document.querySelector('.lb-image');
@@ -339,9 +347,10 @@ document.addEventListener('keydown',function(e){
 });
 
 /* Theme toggle */
-document.getElementById('themeToggle').addEventListener('click',function(){
-  var cur=document.documentElement.getAttribute('data-theme');
-  var next=cur==='dark'?'light':'dark';
+var themeCheck=document.getElementById('themeCheck');
+themeCheck.checked=document.documentElement.getAttribute('data-theme')==='dark';
+themeCheck.addEventListener('change',function(){
+  var next=this.checked?'dark':'light';
   document.documentElement.setAttribute('data-theme',next);
   localStorage.setItem('cok_theme',next);
 });

@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cumhuriyet Örnek Köy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --wheat:#C9933A;
+  --wheat-light:#E8C97A;
+  --cream:#FAF7F0;
+  --sand:#F0E9D8;
+  --stone:#8A7560;
+  --deep:#18100A;
+  --bark:#3D2B1A;
+  --leaf:#4E7245;
+  --leaf2:#7AA670;
+  --flag:#E30A17;
+  --muted:#6B5D4F;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--deep);overflow-x:hidden}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--sand)}
+::-webkit-scrollbar-thumb{background:var(--wheat);border-radius:3px}
+
+/* ── MODALS ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;z-index:1000;
+  background:rgba(24,16,10,0.88);
+  backdrop-filter:blur(6px);
+  align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex}
+.modal-box{
+  background:var(--cream);border-radius:16px;
+  max-height:90vh;overflow-y:auto;
+  animation:modalIn .35s ease;
+  position:relative;
+}
+@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-kapat{
+  position:sticky;top:0;right:0;float:right;
+  background:var(--bark);color:var(--cream);
+  border:none;border-radius:0 16px 0 8px;
+  padding:10px 16px;cursor:pointer;font-size:1.1rem;
+  z-index:10;
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  padding:20px 52px;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:all .35s;
+}
+nav.scrolled{
+  background:rgba(250,247,240,0.95);backdrop-filter:blur(14px);
+  padding:14px 52px;border-bottom:1px solid rgba(58,43,26,0.08);
+  box-shadow:0 2px 20px rgba(24,16,10,0.06);
+}
+.nav-brand{
+  font-family:'Playfair Display',serif;font-size:1.05rem;
+  font-weight:700;color:var(--deep);text-decoration:none;letter-spacing:.02em;
+}
+.nav-brand span{color:var(--flag)}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{
+  font-size:.8rem;font-weight:500;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--bark);text-decoration:none;
+  opacity:.75;transition:opacity .2s;
+}
+.nav-links a:hover{opacity:1}
+
+/* ── HERO SLIDER ── */
+.hero{position:relative;height:100vh;min-height:600px;overflow:hidden}
+.hero-slides{width:100%;height:100%;position:relative}
+.slide{
+  position:absolute;inset:0;opacity:0;
+  transition:opacity 1.4s ease;
+}
+.slide.aktif{opacity:1}
+.slide-img{
+  width:100%;height:100%;object-fit:cover;
+  transform:scale(1.04);
+  transition:transform 8s ease;
+}
+.slide.aktif .slide-img{transform:scale(1)}
+.slide-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(
+    to bottom,
+    rgba(24,16,10,0.18) 0%,
+    rgba(24,16,10,0.05) 40%,
+    rgba(24,16,10,0.55) 100%
+  );
+}
+/* placeholder slides (renk bloğu, gerçek foto eklenince src ile değişir) */
+.slide-placeholder{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+}
+.sp1{background:linear-gradient(135deg,#4A6840 0%,#7AA670 40%,#C8C87A 100%)}
+.sp2{background:linear-gradient(135deg,#3D5038 0%,#8BBDD9 60%,#C9DFF0 100%)}
+.sp3{background:linear-gradient(135deg,#C9933A 0%,#8A5C2A 50%,#3D2B1A 100%)}
+.sp4{background:linear-gradient(135deg,#6B8F6B 0%,#4E7245 40%,#1e3a2a 100%)}
+.sp5{background:linear-gradient(135deg,#B8A84A 0%,#C9DFF0 60%,#8BBDD9 100%)}
+
+.slide-placeholder-text{
+  font-family:'Crimson Pro',serif;font-style:italic;
+  font-size:1.1rem;color:rgba(255,255,255,0.4);
+  letter-spacing:.1em;text-align:center;
+}
+.slide-caption{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:20px 32px 12px;
+  background:linear-gradient(to top,rgba(24,16,10,.7),transparent);
+  font-family:'Crimson Pro',serif;font-style:italic;
+  font-size:.95rem;color:rgba(255,255,255,.7);
+  letter-spacing:.04em;min-height:60px;
+}
+
+/* Hero metin */
+.hero-metin{
+  position:absolute;bottom:80px;left:0;right:0;
+  text-align:center;z-index:10;
+  pointer-events:none;
+}
+.hero-kucuk{
+  font-family:'Crimson Pro',serif;font-style:italic;font-size:1.05rem;
+  color:rgba(255,255,255,.8);letter-spacing:.08em;
+  opacity:0;animation:gelUp .9s .3s ease forwards;
+}
+.hero-baslik{
+  font-family:'Playfair Display',serif;font-size:clamp(2.6rem,7vw,5.8rem);
+  font-weight:900;line-height:1;color:#fff;
+  text-shadow:0 2px 24px rgba(24,16,10,.3);
+  opacity:0;animation:gelUp 1s .5s ease forwards;
+  margin-top:10px;
+}
+.hero-baslik .kirmizi{color:#FFE066}
+.hero-alt{
+  margin-top:16px;
+  font-family:'Crimson Pro',serif;font-size:1.1rem;font-weight:300;
+  color:rgba(255,255,255,.7);letter-spacing:.06em;
+  opacity:0;animation:gelUp 1s .75s ease forwards;
+}
+
+/* Hero Slider Controls */
+.hero-dots{
+  position:absolute;bottom:36px;left:50%;transform:translateX(-50%);
+  display:flex;gap:8px;z-index:20;
+}
+.dot{
+  width:28px;height:3px;border-radius:2px;
+  background:rgba(255,255,255,.35);border:none;cursor:pointer;
+  transition:background .3s,width .3s;padding:0;
+}
+.dot.aktif{background:#fff;width:44px}
+.hero-tum-btn{
+  position:absolute;bottom:36px;right:36px;z-index:20;
+  background:rgba(250,247,240,.15);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.25);border-radius:8px;
+  color:#fff;font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:600;
+  letter-spacing:.08em;padding:9px 18px;cursor:pointer;
+  transition:background .2s;
+}
+.hero-tum-btn:hover{background:rgba(250,247,240,.28)}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.rd1{transition-delay:.08s}.rd2{transition-delay:.2s}.rd3{transition-delay:.32s}
+
+/* ── SECTIONS ── */
+section{padding:88px 0}
+.container{max-width:1100px;margin:0 auto;padding:0 52px}
+.b-etiket{
+  font-size:.68rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--wheat);margin-bottom:12px;
+  display:flex;align-items:center;gap:10px;
+}
+.b-etiket::before{content:'';display:block;width:28px;height:1px;background:var(--wheat)}
+.b-baslik{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2rem,4.5vw,3.4rem);font-weight:700;line-height:1.1;color:var(--bark);
+}
+.b-baslik em{font-style:italic;color:var(--leaf)}
+
+/* ── KÖY + HABERLER BİRLEŞİK ── */
+.koy-haberler{background:var(--cream)}
+.kh-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:64px;margin-top:52px;align-items:start}
+.kh-metin p{
+  font-family:'Crimson Pro',serif;font-size:1.12rem;line-height:1.82;
+  color:var(--muted);margin-bottom:16px;font-weight:300;
+}
+.kh-metin p strong{color:var(--bark);font-weight:600}
+
+.kh-istatistikler{display:flex;flex-direction:column;gap:1px;border-radius:12px;overflow:hidden;margin-bottom:32px}
+.stat-s{
+  display:flex;align-items:center;background:var(--sand);
+  padding:18px 24px;gap:18px;
+}
+.stat-s:nth-child(1){background:#F0E9D8}
+.stat-s:nth-child(2){background:#EAE2CF}
+.stat-s:nth-child(3){background:#E4DBCA}
+.stat-s:nth-child(4){background:#DEDAD1}
+.stat-r{
+  font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;
+  color:var(--wheat);min-width:80px;
+}
+.stat-a{font-size:.88rem;color:var(--bark);font-weight:500;line-height:1.3}
+.stat-a small{display:block;color:var(--stone);font-size:.75rem;margin-top:2px;font-weight:400}
+
+/* Haberler sağ kolon */
+.haberler-baslik{
+  font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;
+  color:var(--bark);margin-bottom:16px;
+}
+.haber-liste{display:flex;flex-direction:column}
+.haber-item{
+  display:grid;grid-template-columns:48px 1fr;gap:16px;
+  align-items:start;padding:16px 0;
+  border-bottom:1px solid rgba(138,117,96,.12);cursor:pointer;
+}
+.haber-item:hover .h-baslik{color:var(--leaf)}
+.h-gun-b{text-align:center}
+.h-gun{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--wheat);line-height:1;display:block}
+.h-ay{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--stone)}
+.h-baslik{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--bark);margin-bottom:3px;transition:color .2s}
+.h-ozet{font-size:.83rem;color:var(--muted);line-height:1.55}
+
+/* ── ATATÜRK KÖŞESİ ── */
+.ataturk{
+  background:var(--bark);position:relative;overflow:hidden;
+  padding:0;
+}
+.at-strip{
+  position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--flag) 0%,#FF6644 50%,var(--flag) 100%);
+}
+
+/* Parallax foto şerit */
+.at-foto-serit{
+  display:flex;overflow:hidden;height:320px;gap:0;
+}
+.at-foto-kutu{
+  flex:1;min-width:0;position:relative;overflow:hidden;
+  transition:flex .5s ease;cursor:pointer;
+}
+.at-foto-kutu:hover{flex:2.2}
+.at-foto-kutu .af-img{
+  width:100%;height:100%;object-fit:cover;
+  transform:scale(1.08);transition:transform .6s ease;
+}
+.at-foto-kutu:hover .af-img{transform:scale(1)}
+.at-foto-placeholder{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+}
+.afp1{background:linear-gradient(160deg,#2a1a0e,#4a3020)}
+.afp2{background:linear-gradient(160deg,#1a2a1a,#2a4030)}
+.afp3{background:linear-gradient(160deg,#1a1a2a,#2a2040)}
+.afp4{background:linear-gradient(160deg,#2a2010,#4a3820)}
+.afp5{background:linear-gradient(160deg,#2a1010,#4a2020)}
+.afp-label{
+  font-family:'Crimson Pro',serif;font-style:italic;
+  font-size:.75rem;color:rgba(255,255,255,.25);
+  letter-spacing:.12em;text-transform:uppercase;text-align:center;padding:8px;
+}
+.at-foto-kutu .at-foto-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(24,16,10,.7) 0%,transparent 60%);
+  opacity:0;transition:opacity .4s;
+}
+.at-foto-kutu:hover .at-foto-overlay{opacity:1}
+.at-foto-altyazi{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:16px 18px 12px;
+  font-family:'Crimson Pro',serif;font-style:italic;
+  font-size:.82rem;color:rgba(255,255,255,.8);
+  opacity:0;transition:opacity .4s .1s;transform:translateY(6px);
+  transition:opacity .4s,transform .4s;
+}
+.at-foto-kutu:hover .at-foto-altyazi{opacity:1;transform:translateY(0)}
+
+/* İçerik */
+.at-icerik-alan{padding:56px 52px 64px;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+.at-sol .at-baslik-kucuk{
+  font-size:.68rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--flag);margin-bottom:14px;display:flex;align-items:center;gap:10px;
+}
+.at-sol .at-baslik-kucuk::before{content:'';display:block;width:28px;height:1px;background:var(--flag)}
+.at-sol h2{
+  font-family:'Playfair Display',serif;font-size:2.3rem;font-weight:700;
+  line-height:1.12;color:#fff;margin-bottom:24px;
+}
+.at-alinti{
+  font-family:'Crimson Pro',serif;font-size:1.28rem;font-style:italic;font-weight:300;
+  color:rgba(255,255,255,.82);line-height:1.65;
+  border-left:2px solid var(--flag);padding-left:20px;margin-bottom:22px;
+}
+.at-metin{font-family:'Crimson Pro',serif;font-size:1.02rem;line-height:1.78;font-weight:300;color:rgba(255,255,255,.56)}
+.at-metin strong{color:rgba(255,255,255,.8);font-weight:600}
+
+.at-tarih{display:flex;flex-direction:column;gap:1px}
+.t-item{
+  display:flex;align-items:center;gap:20px;
+  background:rgba(255,255,255,.04);padding:16px 20px;
+  border-left:2px solid transparent;transition:all .25s;cursor:default;
+}
+.t-item:hover{background:rgba(255,255,255,.08);border-left-color:var(--wheat-light)}
+.t-yil{
+  font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;
+  color:var(--wheat-light);min-width:60px;
+}
+.t-acik{font-size:.85rem;color:rgba(255,255,255,.5);line-height:1.4}
+.t-acik strong{color:rgba(255,255,255,.75);display:block;font-size:.9rem;margin-bottom:1px}
+
+/* ── DUYURULAR ── */
+.duyurular{background:var(--sand)}
+.duyuru-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:48px}
+.dk{
+  background:var(--cream);border-radius:10px;padding:26px 22px;
+  border-top:3px solid transparent;
+  transition:transform .25s,box-shadow .25s;cursor:pointer;
+}
+.dk:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(24,16,10,.1)}
+.dk.et{border-top-color:#8BBDD9}.dk.hb{border-top-color:var(--leaf)}.dk.du{border-top-color:var(--wheat)}
+.dk-tur{font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}
+.c-et{color:#5A9BBD}.c-hb{color:var(--leaf)}.c-du{color:var(--wheat)}
+.dk-bas{font-family:'Playfair Display',serif;font-size:1.18rem;font-weight:700;color:var(--bark);margin-bottom:9px;line-height:1.3}
+.dk-met{font-size:.87rem;line-height:1.68;color:var(--muted)}
+.dk-tar{margin-top:16px;font-size:.73rem;color:var(--stone);font-weight:500}
+
+/* ── ÖZLEM / KÖYLÜLER ── */
+.ozlem{background:var(--cream);padding:88px 0 100px}
+.oz-ust{
+  display:grid;grid-template-columns:1fr 1fr;gap:56px;
+  align-items:center;margin-bottom:64px;
+}
+.oz-yazi .b-etiket{margin-bottom:12px}
+.oz-yazi .b-baslik{margin-bottom:20px}
+.oz-yazi p{
+  font-family:'Crimson Pro',serif;font-size:1.1rem;line-height:1.78;
+  color:var(--muted);font-weight:300;
+}
+.oz-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.oz-stat{
+  background:var(--sand);border-radius:10px;padding:22px 20px;
+  border-bottom:2px solid var(--wheat-light);text-align:center;
+}
+.oz-stat-num{
+  font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:700;
+  color:var(--wheat);line-height:1;display:block;
+}
+.oz-stat-lbl{font-size:.75rem;color:var(--muted);margin-top:6px;letter-spacing:.04em}
+
+/* Sekmeler */
+.sekmeler{
+  display:flex;gap:4px;background:var(--sand);
+  border-radius:9px;padding:4px;width:fit-content;margin-bottom:36px;
+}
+.sekme{
+  padding:9px 22px;border-radius:6px;border:none;
+  background:transparent;cursor:pointer;
+  font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:500;
+  letter-spacing:.04em;color:var(--muted);transition:all .2s;
+}
+.sekme.aktif{background:var(--bark);color:#fff}
+.panel{display:none}.panel.aktif{display:block}
+
+/* Mesaj Girişi */
+.m-kutu{
+  background:var(--sand);border-radius:10px;padding:20px;
+  margin-bottom:20px;border:1px solid rgba(138,117,96,.12);
+  max-width:640px;
+}
+.m-ta{
+  width:100%;border:none;background:transparent;
+  font-family:'Crimson Pro',serif;font-size:1.05rem;
+  color:var(--bark);resize:none;height:78px;line-height:1.6;outline:none;
+}
+.m-ta::placeholder{color:var(--stone);font-style:italic}
+.m-alt{
+  display:flex;align-items:center;justify-content:space-between;
+  border-top:1px solid rgba(138,117,96,.15);padding-top:12px;margin-top:10px;
+}
+.m-isim{
+  border:none;background:transparent;
+  border-bottom:1px solid rgba(138,117,96,.3);
+  font-family:'Nunito',sans-serif;font-size:.85rem;
+  color:var(--bark);padding:4px 0;outline:none;width:200px;
+}
+.m-isim::placeholder{color:var(--stone)}
+.btn-g{
+  background:var(--bark);color:var(--cream);border:none;border-radius:7px;
+  padding:9px 22px;font-family:'Nunito',sans-serif;font-size:.8rem;
+  font-weight:600;letter-spacing:.06em;cursor:pointer;transition:background .2s;
+}
+.btn-g:hover{background:var(--leaf)}
+.m-hint{font-size:.7rem;color:var(--stone);margin-bottom:16px;max-width:640px}
+
+/* Mesaj listesi */
+.mesaj-liste{max-width:640px;display:flex;flex-direction:column;gap:10px}
+.m-item{
+  background:var(--sand);border-radius:9px;padding:16px 18px;
+  border-left:3px solid var(--wheat-light);
+}
+.m-kim{font-size:.76rem;font-weight:700;color:var(--wheat);margin-bottom:4px}
+.m-yazi{font-family:'Crimson Pro',serif;font-size:.98rem;line-height:1.58;color:var(--muted)}
+.m-zaman{font-size:.68rem;color:var(--stone);margin-top:7px;font-family:'Nunito',sans-serif}
+
+/* Tüm mesajlar butonu */
+.tum-btn{
+  display:inline-block;margin-top:18px;
+  background:transparent;border:1px solid rgba(61,43,26,.2);
+  border-radius:8px;padding:10px 22px;cursor:pointer;
+  font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:600;
+  letter-spacing:.06em;color:var(--bark);transition:all .2s;
+}
+.tum-btn:hover{background:var(--bark);color:var(--cream)}
+
+/* ── İLETİŞİM ── */
+.iletisim{background:var(--sand)}
+.il-grid{display:grid;grid-template-columns:1fr 1.3fr;gap:64px;margin-top:52px;align-items:start}
+.il-sol-p{font-family:'Crimson Pro',serif;font-size:1.08rem;line-height:1.78;font-weight:300;color:var(--muted);margin-bottom:28px}
+.il-s{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px}
+.il-ikon{width:34px;height:34px;border-radius:8px;background:var(--bark);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.il-ikon svg{width:15px;height:15px;fill:none;stroke:var(--cream);stroke-width:1.6}
+.il-v{font-size:.86rem;color:var(--muted);line-height:1.5}
+.il-v strong{display:block;color:var(--bark);font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1px}
+.form{display:flex;flex-direction:column;gap:13px}
+.form2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.f-a{display:flex;flex-direction:column;gap:4px}
+.f-a label{font-size:.69rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--stone)}
+.f-a input,.f-a textarea{
+  background:var(--cream);border:1px solid rgba(138,117,96,.18);
+  border-radius:7px;padding:11px 14px;
+  font-family:'Nunito',sans-serif;font-size:.9rem;
+  color:var(--bark);outline:none;transition:border-color .2s;
+}
+.f-a input:focus,.f-a textarea:focus{border-color:var(--wheat)}
+.f-a textarea{resize:none;height:96px}
+.btn-s{
+  background:var(--bark);color:var(--cream);border:none;border-radius:8px;
+  padding:12px 26px;font-family:'Nunito',sans-serif;font-size:.83rem;
+  font-weight:700;letter-spacing:.08em;cursor:pointer;align-self:flex-start;
+  transition:background .2s;
+}
+.btn-s:hover{background:var(--leaf)}
+
+/* ── FOOTER ── */
+footer{
+  background:var(--deep);color:rgba(250,247,240,.42);
+  text-align:center;padding:32px 24px;
+  font-size:.77rem;letter-spacing:.05em;
+}
+footer strong{color:rgba(250,247,240,.8)}
+
+/* ── TÜM FOTOĞRAFLAR MODALİ ── */
+.foto-modal-box{
+  width:min(94vw,1100px);padding:0;
+  border-radius:16px;overflow:hidden;
+  max-height:90vh;
+}
+.foto-modal-ust{
+  background:var(--bark);padding:20px 24px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.foto-modal-ust h3{
+  font-family:'Playfair Display',serif;font-size:1.3rem;
+  font-weight:700;color:var(--cream);
+}
+.foto-kapat{
+  background:rgba(255,255,255,.1);border:none;color:var(--cream);
+  width:32px;height:32px;border-radius:50%;font-size:1rem;
+  cursor:pointer;transition:background .2s;display:flex;align-items:center;justify-content:center;
+}
+.foto-kapat:hover{background:rgba(255,255,255,.22)}
+.foto-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  padding:8px;background:var(--sand);max-height:75vh;overflow-y:auto;
+}
+.fg-item{
+  aspect-ratio:4/3;border-radius:6px;overflow:hidden;
+  position:relative;cursor:pointer;
+}
+.fg-item:hover .fg-overlay{opacity:1}
+.fg-img{width:100%;height:100%;object-fit:cover;display:block}
+.fg-placeholder{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+}
+.fg-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(24,16,10,.8),transparent 60%);
+  opacity:0;transition:opacity .3s;
+  display:flex;align-items:flex-end;padding:12px;
+}
+.fg-overlay span{font-family:'Crimson Pro',serif;font-style:italic;font-size:.85rem;color:rgba(255,255,255,.9)}
+.fg-aciklama-form{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(24,16,10,.75);padding:6px 8px;
+  display:flex;gap:6px;align-items:center;
+  opacity:0;transition:opacity .25s;
+}
+.fg-item:hover .fg-aciklama-form{opacity:1}
+.fg-ac-input{
+  flex:1;border:none;background:rgba(255,255,255,.15);border-radius:4px;
+  padding:5px 8px;color:#fff;font-size:.75rem;outline:none;
+  font-family:'Nunito',sans-serif;
+}
+.fg-ac-input::placeholder{color:rgba(255,255,255,.45)}
+.fg-ac-btn{
+  border:none;background:var(--wheat);color:#fff;border-radius:4px;
+  padding:5px 9px;cursor:pointer;font-size:.72rem;font-weight:700;white-space:nowrap;
+}
+
+/* Tüm Mesajlar Modal */
+.mesaj-modal-box{
+  width:min(92vw,680px);padding:0;border-radius:16px;overflow:hidden;
+  max-height:90vh;
+}
+.mm-ust{
+  background:var(--bark);padding:18px 22px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.mm-ust h3{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--cream)}
+.mm-kapat{
+  background:rgba(255,255,255,.1);border:none;color:var(--cream);
+  width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1rem;
+  display:flex;align-items:center;justify-content:center;
+}
+.mm-liste{
+  padding:16px;background:var(--sand);
+  max-height:78vh;overflow-y:auto;
+  display:flex;flex-direction:column;gap:10px;
+}
+.mm-item{
+  background:var(--cream);border-radius:9px;padding:16px 18px;
+  border-left:3px solid var(--wheat-light);
+}
+.mm-kim{font-size:.75rem;font-weight:700;color:var(--wheat);margin-bottom:4px}
+.mm-yazi{font-family:'Crimson Pro',serif;font-size:.97rem;line-height:1.58;color:var(--muted)}
+.mm-zaman{font-size:.67rem;color:var(--stone);margin-top:6px}
+
+@keyframes gelUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:880px){
+  nav{padding:16px 22px}nav.scrolled{padding:12px 22px}
+  .nav-links{display:none}
+  .container{padding:0 22px}
+  .kh-grid,.oz-ust,.il-grid,.at-icerik-alan{grid-template-columns:1fr;gap:32px}
+  .duyuru-grid{grid-template-columns:1fr}
+  .form2{grid-template-columns:1fr}
+  .at-foto-serit{height:200px}
+  .foto-grid{grid-template-columns:repeat(2,1fr)}
+  .oz-stat-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="fotoModal">
+  <div class="modal-box foto-modal-box">
+    <div class="foto-modal-ust">
+      <h3>Köy Fotoğrafları</h3>
+      <button class="foto-kapat" onclick="kapat('fotoModal')">✕</button>
+    </div>
+    <div class="foto-grid" id="fotoGrid"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="mesajModal">
+  <div class="modal-box mesaj-modal-box">
+    <div class="mm-ust">
+      <h3>Tüm Selamlar</h3>
+      <button class="mm-kapat" onclick="kapat('mesajModal')">✕</button>
+    </div>
+    <div class="mm-liste" id="mmListe"></div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a class="nav-brand" href="#"><span>C.</span> Örnek Köy</a>
+  <ul class="nav-links">
+    <li><a href="#koyhaberler">Köyümüz</a></li>
+    <li><a href="#ataturk">Atatürk Köşesi</a></li>
+    <li><a href="#duyurular">Duyurular</a></li>
+    <li><a href="#ozlem">Köylüler</a></li>
+    <li><a href="#iletisim">İletişim</a></li>
+  </ul>
+</nav>
+
+<!-- HERO SLIDER -->
+<section class="hero">
+  <div class="hero-slides" id="heroSlides">
+
+    <div class="slide aktif" id="slide-0">
+      <div class="slide-placeholder sp1">
+        <div class="slide-placeholder-text">Köy Meydanı<br><small style="font-size:.75rem">fotoğraf eklenebilir</small></div>
+      </div>
+      <div class="slide-overlay"></div>
+      <div class="slide-caption" id="cap-0">Köy meydanı, halkın buluşma noktası.</div>
+    </div>
+
+    <div class="slide" id="slide-1">
+      <div class="slide-placeholder sp2">
+        <div class="slide-placeholder-text">Tarla Manzarası</div>
+      </div>
+      <div class="slide-overlay"></div>
+      <div class="slide-caption" id="cap-1">Cumhuriyet Örnek Köy'ün bereketli tarlaları.</div>
+    </div>
+
+    <div class="slide" id="slide-2">
+      <div class="slide-placeholder sp3">
+        <div class="slide-placeholder-text">Köy Camii</div>
+      </div>
+      <div class="slide-overlay"></div>
+      <div class="slide-caption" id="cap-2">Köyümüzün tarihi camii.</div>
+    </div>
+
+    <div class="slide" id="slide-3">
+      <div class="slide-placeholder sp4">
+        <div class="slide-placeholder-text">İlkokul</div>
+      </div>
+      <div class="slide-overlay"></div>
+      <div class="slide-caption" id="cap-3">Köy ilkokulu, 1927'de açıldı.</div>
+    </div>
+
+    <div class="slide" id="slide-4">
+      <div class="slide-placeholder sp5">
+        <div class="slide-placeholder-text">Hasat Dönemi</div>
+      </div>
+      <div class="slide-overlay"></div>
+      <div class="slide-caption" id="cap-4">Yaz hasadı, köyün en coşkulu zamanı.</div>
+    </div>
+
+  </div>
+
+  <div class="hero-metin">
+    <div class="hero-kucuk">Anadolu'nun bağrında</div>
+    <h1 class="hero-baslik">Cumhuriyet<br><span class="kirmizi">Örnek</span> Köy</h1>
+    <p class="hero-alt">1923'ten bu yana toprağa ve cumhuriyete bağlı.</p>
+  </div>
+
+  <div class="hero-dots" id="heroDots">
+    <button class="dot aktif" onclick="gotoSlide(0)"></button>
+    <button class="dot" onclick="gotoSlide(1)"></button>
+    <button class="dot" onclick="gotoSlide(2)"></button>
+    <button class="dot" onclick="gotoSlide(3)"></button>
+    <button class="dot" onclick="gotoSlide(4)"></button>
+  </div>
+
+  <button class="hero-tum-btn" onclick="ac('fotoModal')">Tüm Fotoğraflar</button>
+</section>
+
+<!-- KÖY + HABERLER BİRLEŞİK -->
+<section class="koy-haberler" id="koyhaberler">
+  <div class="container">
+    <div class="reveal">
+      <div class="b-etiket">Köyümüz</div>
+      <h2 class="b-baslik">Toprakta kök,<br><em>gönülde yuva.</em></h2>
+    </div>
+    <div class="kh-grid">
+      <div>
+        <div class="kh-metin reveal rd1">
+          <p>Cumhuriyet Örnek Köy, adını ve ruhunu <strong>Türkiye Cumhuriyeti'nin kuruluşundan</strong> alır. "Örnek" kelimesi tesadüf değil; köy, Atatürk'ün model köy vizyonu çerçevesinde kurulan yerleşim birimlerinden biridir.</p>
+          <p>Tarih boyunca <strong>buğday tarlalarında, bağ bahçelerde, çarşamba pazarlarında</strong> büyüyen bir topluluktur burası. Her evin bir hikâyesi, her sokağın bir adı vardır.</p>
+          <p>Şehre gidenler döner, dönmeyenler özlem duyar.</p>
+        </div>
+        <div class="kh-istatistikler reveal rd2">
+          <div class="stat-s"><span class="stat-r">340</span><div class="stat-a">Hanehalkı<small>Kayıtlı köy nüfusu</small></div></div>
+          <div class="stat-s"><span class="stat-r">1923</span><div class="stat-a">Kuruluş yılı<small>Cumhuriyetle birlikte kuruldu</small></div></div>
+          <div class="stat-s"><span class="stat-r">4.800</span><div class="stat-a">Dönüm tarım arazisi<small>Buğday, arpa, ayçiçeği</small></div></div>
+          <div class="stat-s"><span class="stat-r">101</span><div class="stat-a">Yıllık geçmiş<small>Bir asra yakın köy tarihi</small></div></div>
+        </div>
+      </div>
+      <div class="reveal rd2">
+        <div class="haberler-baslik">Köyden Haberler</div>
+        <div class="haber-liste">
+          <div class="haber-item">
+            <div class="h-gun-b"><span class="h-gun">08</span><span class="h-ay">Haz</span></div>
+            <div><div class="h-baslik">Organik tarım sertifikası alındı</div><div class="h-ozet">İl Tarım Müdürlüğü denetimlerinin ardından köy resmi organik tarım belgesini aldı.</div></div>
+          </div>
+          <div class="haber-item">
+            <div class="h-gun-b"><span class="h-gun">01</span><span class="h-ay">Haz</span></div>
+            <div><div class="h-baslik">Yeni asfalt yol teslim edildi</div><div class="h-ozet">Köyü ilçeye bağlayan 4 km'lik yol projesi tamamlandı.</div></div>
+          </div>
+          <div class="haber-item">
+            <div class="h-gun-b"><span class="h-gun">22</span><span class="h-ay">May</span></div>
+            <div><div class="h-baslik">İlk buğday hasadı başladı</div><div class="h-ozet">Erken gelen sıcaklar hasat takvimini iki hafta öne aldırdı.</div></div>
+          </div>
+          <div class="haber-item">
+            <div class="h-gun-b"><span class="h-gun">14</span><span class="h-ay">May</span></div>
+            <div><div class="h-baslik">Kütüphane yenilendi</div><div class="h-ozet">Bağışlarla desteklenen kütüphane yeniden düzenlendi, 400 kitap eklendi.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ATATÜRK KÖŞESİ -->
+<section class="ataturk" id="ataturk">
+  <div class="at-strip"></div>
+
+  <!-- Hover açılan fotoğraf şeridi -->
+  <div class="at-foto-serit reveal">
+    <div class="at-foto-kutu">
+      <div class="at-foto-placeholder afp1"><span class="afp-label">Atatürk'ün Köy Ziyaretleri</span></div>
+      <div class="at-foto-overlay"></div>
+      <div class="at-foto-altyazi">Atatürk köyleri dolaşarak halkla buluşurdu.</div>
+    </div>
+    <div class="at-foto-kutu">
+      <div class="at-foto-placeholder afp2"><span class="afp-label">Cumhuriyet İlanı 1923</span></div>
+      <div class="at-foto-overlay"></div>
+      <div class="at-foto-altyazi">29 Ekim 1923, Türkiye Cumhuriyeti'nin ilanı.</div>
+    </div>
+    <div class="at-foto-kutu">
+      <div class="at-foto-placeholder afp3"><span class="afp-label">İlk Köy Okulu</span></div>
+      <div class="at-foto-overlay"></div>
+      <div class="at-foto-altyazi">Köyümüzün ilk okulu 1927'de açıldı.</div>
+    </div>
+    <div class="at-foto-kutu">
+      <div class="at-foto-placeholder afp4"><span class="afp-label">Tarım Devrimi</span></div>
+      <div class="at-foto-overlay"></div>
+      <div class="at-foto-altyazi">Cumhuriyet köylerde modern tarımı başlattı.</div>
+    </div>
+    <div class="at-foto-kutu">
+      <div class="at-foto-placeholder afp5"><span class="afp-label">Köy Enstitüleri</span></div>
+      <div class="at-foto-overlay"></div>
+      <div class="at-foto-altyazi">Köy enstitüleri Anadolu'yu aydınlattı.</div>
+    </div>
+  </div>
+
+  <div class="at-icerik-alan">
+    <div class="at-sol reveal">
+      <div class="at-baslik-kucuk">Atatürk Köşesi</div>
+      <h2>Cumhuriyet'in<br>Örnek Köyü</h2>
+      <blockquote class="at-alinti">"Köylü milletin efendisidir."</blockquote>
+      <p class="at-metin">
+        Köyümüz, Cumhuriyet'in ilk yıllarında <strong>Atatürk'ün "model köy" projesi</strong> kapsamında kurulan yerleşim birimlerinden biridir. Adındaki "Örnek" sözcüğü, yeni Türkiye'nin tarımda, eğitimde ve kalkınmada öncü olacak köylere verilen unvandır.
+      </p>
+      <p class="at-metin" style="margin-top:14px">
+        1923'te temelleri atılan köyümüz, <strong>ilk köy okulunu, ilk kooperatifi</strong> ve ilk köy demirbaşını bu topraklarda kurdu.
+      </p>
+    </div>
+    <div class="at-tarih reveal rd1">
+      <div class="t-item"><span class="t-yil">1923</span><div class="t-acik"><strong>Cumhuriyet Köyü Kuruldu</strong>Türkiye Cumhuriyeti'nin ilanıyla birlikte köy resmî statü kazandı.</div></div>
+      <div class="t-item"><span class="t-yil">1927</span><div class="t-acik"><strong>İlk Okul Açıldı</strong>Köy çocukları artık kendi köylerinde okuyabiliyordu.</div></div>
+      <div class="t-item"><span class="t-yil">1935</span><div class="t-acik"><strong>Tarım Kooperatifi Kuruldu</strong>Çiftçiler birlikte güçlendi.</div></div>
+      <div class="t-item"><span class="t-yil">1950</span><div class="t-acik"><strong>İlk Traktör Geldi</strong>Motorlu tarım köyde başladı.</div></div>
+      <div class="t-item"><span class="t-yil">1970</span><div class="t-acik"><strong>Elektrik Bağlandı</strong>Köy elektriklendi, yeni bir çağ başladı.</div></div>
+      <div class="t-item"><span class="t-yil">2025</span><div class="t-acik"><strong>Bu Sayfa Açıldı</strong>Köyümüz dijitalde de yaşıyor.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- DUYURULAR -->
+<section class="duyurular" id="duyurular">
+  <div class="container">
+    <div class="reveal">
+      <div class="b-etiket">Güncel</div>
+      <h2 class="b-baslik">Duyurular<br><em>ve Etkinlikler</em></h2>
+    </div>
+    <div class="duyuru-grid">
+      <div class="dk et reveal rd1">
+        <div class="dk-tur c-et">Etkinlik</div>
+        <h3 class="dk-bas">Yaz Şenliği 2025</h3>
+        <p class="dk-met">Geleneksel yaz şenliğimiz köy meydanında. Müzik, yemek, el sanatları ve oyunlar sizi bekliyor.</p>
+        <div class="dk-tar">15 Temmuz 2025, Saat 17:00</div>
+      </div>
+      <div class="dk hb reveal rd2">
+        <div class="dk-tur c-hb">Haber</div>
+        <h3 class="dk-bas">Sulama Projesi Başladı</h3>
+        <p class="dk-met">İl Tarım Müdürlüğü desteğiyle köy tarlalarına damlama sulama sistemi kuruluyor.</p>
+        <div class="dk-tar">3 Haziran 2025</div>
+      </div>
+      <div class="dk du reveal rd3">
+        <div class="dk-tur c-du">Duyuru</div>
+        <h3 class="dk-bas">Muhtarlık Bilgilendirmesi</h3>
+        <p class="dk-met">2025 muhtarlık seçim süreçleri hakkında bilgilendirme toplantısı köy kahvesinde yapılacak.</p>
+        <div class="dk-tar">28 Mayıs 2025</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ÖZLEM / KÖYLÜLER -->
+<section class="ozlem" id="ozlem">
+  <div class="container">
+    <div class="oz-ust reveal">
+      <div class="oz-yazi">
+        <div class="b-etiket">Köylüler İçin</div>
+        <h2 class="b-baslik">Uzaktaysan bile<br><em>burada bir yerin var.</em></h2>
+        <p style="margin-top:16px">Şehirlere, ülkelerin dört bir yanına dağılan köylülerimiz için bu köşe açık. Selam bırak, anını yaz, köyden uzakta da bağını koru.</p>
+      </div>
+      <div class="oz-stat-grid">
+        <div class="oz-stat">
+          <span class="oz-stat-num">12+</span>
+          <div class="oz-stat-lbl">Farklı şehirden köylü</div>
+        </div>
+        <div class="oz-stat">
+          <span class="oz-stat-num">3</span>
+          <div class="oz-stat-lbl">Farklı ülkede köylümüz</div>
+        </div>
+        <div class="oz-stat">
+          <span class="oz-stat-num">Her</span>
+          <div class="oz-stat-lbl">Bayram köye dönüş</div>
+        </div>
+        <div class="oz-stat">
+          <span class="oz-stat-num">Bir</span>
+          <div class="oz-stat-lbl">Köyümüz, bir kalbimiz</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sekmeler reveal rd1">
+      <button class="sekme aktif" onclick="sekme('mesajlar',this)">Selam Bırak</button>
+      <button class="sekme" onclick="sekme('galeri',this)">Köy Fotoğrafları</button>
+    </div>
+
+    <!-- Mesaj Paneli -->
+    <div class="panel aktif" id="p-mesajlar">
+      <div class="m-kutu">
+        <textarea class="m-ta" id="mYazi" placeholder="Köye bir selam bırak, bir anını paylaş..."></textarea>
+        <div class="m-alt">
+          <input class="m-isim" id="mIsim" type="text" placeholder="Adın Soyadın — Şehir"/>
+          <button class="btn-g" onclick="mesajEkle()">Gönder</button>
+        </div>
+      </div>
+      <p class="m-hint">Ctrl+Enter ile de gönderebilirsin.</p>
+      <div class="mesaj-liste" id="mesajListe">
+        <div class="m-item" data-ts="2025-06-07T14:32:11">
+          <div class="m-kim">Ahmet Kaya — İstanbul</div>
+          <div class="m-yazi">O çınar ağacının altındaki sohbetleri hiç unutmadım. Yaz tatilinde mutlaka geliyorum, herkese selamlar!</div>
+          <div class="m-zaman"></div>
+        </div>
+        <div class="m-item" data-ts="2025-06-04T09:15:47">
+          <div class="m-kim">Fatma Demir — Ankara</div>
+          <div class="m-yazi">Annemin yaptığı tutmaç çorbasını hiçbir restoranda bulamadım. Köyün kokusu başka.</div>
+          <div class="m-zaman"></div>
+        </div>
+        <div class="m-item" data-ts="2025-05-28T21:03:59">
+          <div class="m-kim">Mehmet Yılmaz — Almanya</div>
+          <div class="m-yazi">30 yıldır her bayramı düşünürüm. Bu yıl mutlaka geleceğim, söz.</div>
+          <div class="m-zaman"></div>
+        </div>
+      </div>
+      <button class="tum-btn" onclick="tumMesajlar()">Tüm selamları gör</button>
+    </div>
+
+    <!-- Galeri Paneli -->
+    <div class="panel" id="p-galeri">
+      <div class="foto-grid" style="background:var(--sand);padding:8px;border-radius:12px" id="kucukGaleri"></div>
+      <button class="tum-btn" onclick="ac('fotoModal')">Tüm fotoğrafları gör</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- İLETİŞİM -->
+<section class="iletisim" id="iletisim">
+  <div class="container">
+    <div class="reveal">
+      <div class="b-etiket">Ulaşın</div>
+      <h2 class="b-baslik">Muhtarlıkla<br><em>İletişim</em></h2>
+    </div>
+    <div class="il-grid">
+      <div class="reveal rd1">
+        <p class="il-sol-p">Köye dair her türlü öneri, şikâyet veya bilgi talebiniz için muhtarlığımıza ulaşabilirsiniz.</p>
+        <div class="il-s">
+          <div class="il-ikon"><svg viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+          <div class="il-v"><strong>Adres</strong>Cumhuriyet Örnek Köy Muhtarlığı, Türkiye</div>
+        </div>
+        <div class="il-s">
+          <div class="il-ikon"><svg viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg></div>
+          <div class="il-v"><strong>Telefon</strong>+90 (xxx) xxx xx xx</div>
+        </div>
+        <div class="il-s">
+          <div class="il-ikon"><svg viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>
+          <div class="il-v"><strong>E-posta</strong>muhtar@ornekkov.tr</div>
+        </div>
+      </div>
+      <div class="form reveal rd2">
+        <div class="form2">
+          <div class="f-a"><label>Adınız</label><input type="text" placeholder="Ad Soyad"/></div>
+          <div class="f-a"><label>Telefon</label><input type="tel" placeholder="0 5xx xxx xx xx"/></div>
+        </div>
+        <div class="f-a"><label>Konu</label><input type="text" placeholder="Mesajınızın konusu"/></div>
+        <div class="f-a"><label>Mesajınız</label><textarea placeholder="Merhaba..."></textarea></div>
+        <button class="btn-s">Mesajı Gönder</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p style="margin-bottom:8px;font-size:1.3rem;letter-spacing:4px">&#127481;&#127479;</p>
+  <p><strong>Cumhuriyet Örnek Köy</strong> &nbsp;|&nbsp; Muhtarlık Resmi Sitesi &nbsp;|&nbsp; 2025</p>
+  <p style="margin-top:8px;font-size:.71rem">Toprak kokusu, ekmek kokusu. Köyümüz her zaman burada.</p>
+</footer>
+
+<script>
+// ── NAV ──
+const nav=document.getElementById('navbar');
+window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>50));
+
+// ── REVEAL ──
+(function(){
+  const obs=new IntersectionObserver(en=>en.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+})();
+
+// ── HERO SLIDER ──
+let curSlide=0,total=5,autoTimer;
+function gotoSlide(i){
+  document.querySelectorAll('.slide').forEach((s,idx)=>{
+    s.classList.toggle('aktif',idx===i);
+  });
+  document.querySelectorAll('.dot').forEach((d,idx)=>d.classList.toggle('aktif',idx===i));
+  curSlide=i;
+}
+function nextSlide(){gotoSlide((curSlide+1)%total)}
+autoTimer=setInterval(nextSlide,5000);
+document.getElementById('heroSlides').addEventListener('click',()=>{clearInterval(autoTimer);nextSlide();autoTimer=setInterval(nextSlide,5000)});
+
+// ── FOTO VERİSİ ──
+const fotolar=[
+  {renk:'linear-gradient(135deg,#4A6840,#7AA670)',ad:'Köy Meydanı',aciklama:'Köy meydanı, halkın buluşma noktası.'},
+  {renk:'linear-gradient(135deg,#3D5038,#8BBDD9)',ad:'Tarla Manzarası',aciklama:'Cumhuriyet Örnek Köy\'ün bereketli tarlaları.'},
+  {renk:'linear-gradient(135deg,#C9933A,#8A5C2A)',ad:'Köy Camii',aciklama:'Köyümüzün tarihi camii.'},
+  {renk:'linear-gradient(135deg,#6B8F6B,#4E7245)',ad:'İlkokul',aciklama:'Köy ilkokulu, 1927\'de açıldı.'},
+  {renk:'linear-gradient(135deg,#B8A84A,#C9DFF0)',ad:'Hasat Dönemi',aciklama:'Yaz hasadı, köyün en coşkulu zamanı.'},
+  {renk:'linear-gradient(135deg,#2a4030,#6B8F6B)',ad:'Köy Çeşmesi',aciklama:'Eski köy çeşmesi hâlâ ayakta.'},
+  {renk:'linear-gradient(135deg,#4a3020,#8A7560)',ad:'Kış Manzarası',aciklama:'Kar altında Cumhuriyet Örnek Köy.'},
+  {renk:'linear-gradient(135deg,#1e3a2a,#4A6840)',ad:'Bağlar',aciklama:'Köyün üzüm bağları.'},
+  {renk:'linear-gradient(135deg,#8BBDD9,#3D5038)',ad:'Gün Batımı',aciklama:'Köy üzerinde bir gün batımı.'},
+];
+
+// Fotoğraf modal gridi
+function fotoBuildGrid(containerId){
+  const g=document.getElementById(containerId);
+  g.innerHTML='';
+  fotolar.forEach((f,i)=>{
+    const div=document.createElement('div');
+    div.className='fg-item';
+    div.innerHTML=`
+      <div class="fg-placeholder" style="background:${f.renk}">
+        <div class="fg-overlay"><span>${f.aciklama}</span></div>
+      </div>
+      <div class="fg-aciklama-form">
+        <input class="fg-ac-input" id="ac-${containerId}-${i}" placeholder="Açıklama ekle..." value="${f.aciklama}"/>
+        <button class="fg-ac-btn" onclick="aciklamaKaydet(${i},'${containerId}')">Kaydet</button>
+      </div>
+    `;
+    g.appendChild(div);
+  });
+}
+function aciklamaKaydet(i,cid){
+  const v=document.getElementById(`ac-${cid}-${i}`).value.trim();
+  if(v){fotolar[i].aciklama=v;fotoBuildGrid(cid);fotoBuildGrid(cid==='fotoGrid'?'kucukGaleri':'fotoGrid');}
+}
+
+fotoBuildGrid('fotoGrid');
+fotoBuildGrid('kucukGaleri');
+
+// ── MODAL ──
+function ac(id){document.getElementById(id).classList.add('open')}
+function kapat(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')}));
+
+// ── TIMESTAMP ──
+function tsFormat(ts){
+  const d=new Date(ts);
+  const pad=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+document.querySelectorAll('.m-item[data-ts]').forEach(el=>{
+  el.querySelector('.m-zaman').textContent=tsFormat(el.dataset.ts);
+});
+
+// ── MESAJ ──
+const tumMesajlar_data=[];
+document.querySelectorAll('#mesajListe .m-item').forEach(el=>{
+  tumMesajlar_data.push({
+    kim:el.querySelector('.m-kim').textContent,
+    yazi:el.querySelector('.m-yazi').textContent,
+    ts:el.dataset.ts,
+  });
+});
+
+function mesajEkle(){
+  const yazi=document.getElementById('mYazi').value.trim();
+  const isim=document.getElementById('mIsim').value.trim();
+  if(!yazi)return;
+  const now=new Date().toISOString();
+  const obj={kim:isim||'Köylü',yazi,ts:now};
+  tumMesajlar_data.unshift(obj);
+
+  const liste=document.getElementById('mesajListe');
+  const div=document.createElement('div');
+  div.className='m-item';div.dataset.ts=now;
+  div.style.cssText='opacity:0;transform:translateY(10px);transition:opacity .4s,transform .4s';
+  div.innerHTML=`<div class="m-kim">${obj.kim}</div><div class="m-yazi">${obj.yazi}</div><div class="m-zaman">${tsFormat(now)}</div>`;
+  liste.prepend(div);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{div.style.opacity='1';div.style.transform='translateY(0)'}));
+  document.getElementById('mYazi').value='';
+  document.getElementById('mIsim').value='';
+}
+document.getElementById('mYazi').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.ctrlKey)mesajEkle()});
+
+function tumMesajlar(){
+  const liste=document.getElementById('mmListe');
+  liste.innerHTML='';
+  tumMesajlar_data.forEach(m=>{
+    const div=document.createElement('div');
+    div.className='mm-item';
+    div.innerHTML=`<div class="mm-kim">${m.kim}</div><div class="mm-yazi">${m.yazi}</div><div class="mm-zaman">${tsFormat(m.ts)}</div>`;
+    liste.appendChild(div);
+  });
+  ac('mesajModal');
+}
+
+// ── SEKMELER ──
+function sekme(id,btn){
+  document.querySelectorAll('.sekme').forEach(b=>b.classList.remove('aktif'));
+  btn.classList.add('aktif');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('aktif'));
+  document.getElementById('p-'+id).classList.add('aktif');
+}
+</script>
+</body>
+</html>
