@@ -3,7 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cumhuriyet Örnek Köy</title>
+<title>Cumhuriyet Örnek Köy | Malatya, Yeşilyurt</title>
+<meta name="description" content="Cumhuriyet Örnek Köy - Malatya Yeşilyurt'ta bulunan, Atatürk'ün model köy vizyonuyla kurulan tarihi köyümüzün resmi web sitesi. Köy haberleri, fotoğraflar ve selamlar.">
+<meta name="keywords" content="Cumhuriyet Örnek Köy, Malatya, Yeşilyurt, köy, Atatürk, model köy, Anadolu, Türkiye, köy sitesi">
+<meta name="author" content="Cumhuriyet Örnek Köy">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://cumhuriyetornekkoy.com/">
+<meta property="og:title" content="Cumhuriyet Örnek Köy - Malatya, Yeşilyurt">
+<meta property="og:description" content="Cumhuriyetle kurulan, toprakla büyüyen bir köy. Malatya Yeşilyurt'un tarihi Cumhuriyet köyü.">
+<meta property="og:url" content="https://cumhuriyetornekkoy.com/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:site_name" content="Cumhuriyet Örnek Köy">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Cumhuriyet Örnek Köy - Malatya, Yeşilyurt">
+<meta name="twitter:description" content="Cumhuriyetle kurulan, toprakla büyüyen bir köy.">
+<meta name="theme-color" content="#1e293b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script>(function(){var t=localStorage.getItem('cok_theme');if(!t)t=window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);})()</script>
@@ -35,9 +50,11 @@ a{text-decoration:none;color:inherit}
 /* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:18px 48px;display:flex;align-items:center;justify-content:space-between;transition:all .4s cubic-bezier(.4,0,.2,1)}
 nav.scrolled{background:var(--surface);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);padding:12px 48px;box-shadow:0 1px 0 var(--border)}
-.nav-brand{display:flex;align-items:center;gap:12px;transition:all .4s}
+.nav-brand{display:flex;flex-direction:column;gap:0;transition:all .4s}
 .brand-name{font-size:.92rem;font-weight:700;color:#fff;letter-spacing:-.01em;transition:color .4s}
 nav.scrolled .brand-name{color:var(--text)}
+.brand-sub{font-size:.62rem;font-weight:400;color:rgba(255,255,255,.5);letter-spacing:.04em;display:block;margin-top:1px;transition:color .4s}
+nav.scrolled .brand-sub{color:var(--text-sec)}
 
 /* THEME TOGGLE - SLIDING SWITCH */
 .theme-switch{position:relative;width:44px;height:24px;flex-shrink:0;cursor:pointer}
@@ -73,7 +90,7 @@ nav.scrolled .nav-hamburger span{background:var(--text)}
 
 /* HERO */
 .hero{position:relative;height:100vh;min-height:600px;overflow:hidden;background:var(--hero-bg,#0f172a)}
-:root{--hero-bg:#e2e8f0}
+:root{--hero-bg:#1e293b}
 [data-theme="dark"]{--hero-bg:#0f172a}
 .hero-slides{width:100%;height:100%;position:relative}
 .slide{position:absolute;inset:0;opacity:0;transition:opacity 1.2s cubic-bezier(.4,0,.2,1);z-index:1}
@@ -287,6 +304,7 @@ section{padding:100px 0;position:relative;transition:background .4s}
 <nav id="navbar">
   <span class="nav-brand">
     <span class="brand-name" id="brandName">Cumhuriyet Örnek Köy</span>
+    <span class="brand-sub" id="brandLocation">Malatya, Yeşilyurt</span>
   </span>
   <ul class="nav-links" id="navLinks">
     <li><a href="#koyumuz" id="navKoyumuz" data-i18n="nav_koyumuz">Köyümüz</a></li>
@@ -338,7 +356,6 @@ section{padding:100px 0;position:relative;transition:background .4s}
   <div class="hero-content">
     <div class="hero-small" id="heroSmall" data-i18n="hero_small">Anadolu'nun bağrında</div>
     <h1 class="hero-title" id="heroTitle" data-i18n-html="hero_title">Cumhuriyet<br><span>Örnek Köy</span></h1>
-    <p class="hero-location" id="heroLocation" data-i18n="hero_location">Malatya, Yeşilyurt</p>
     <p class="hero-sub" id="heroSub" data-i18n="hero_sub">Cumhuriyetle kurulan, toprakla büyüyen bir köy.</p>
   </div>
 
@@ -491,8 +508,10 @@ section{padding:100px 0;position:relative;transition:background .4s}
 
 <div class="toast" id="toast"></div>
 
+<script src="site-data.js" onerror="this.remove()"></script>
 <script>
 /* ═══════════ DATA LAYER ═══════════ */
+if(!window.SITE_DATA)window.SITE_DATA=null;
 var DATA_KEY='cok_site';
 function getDefaultData(){
   return {
@@ -556,6 +575,7 @@ function loadData(){try{var d=localStorage.getItem(DATA_KEY);return d?JSON.parse
 function saveData(d){localStorage.setItem(DATA_KEY,JSON.stringify(d));}
 function getData(){
   var d=loadData();
+  if(!d&&window.SITE_DATA){d=JSON.parse(JSON.stringify(window.SITE_DATA));saveData(d);}
   if(!d){d=getDefaultData();saveData(d);return d;}
   var c=d.content;
   if(!c.menuKoyumuz)c.menuKoyumuz='Köyümüz';
@@ -825,9 +845,8 @@ function showToast(msg){
   document.getElementById('heroSmall').textContent=c.heroSmall||'';
   document.getElementById('heroTitle').innerHTML=c.heroTitle||'';
   document.getElementById('heroSub').textContent=c.heroSub||'';
-  var heroLoc=document.getElementById('heroLocation');
-  if(heroLoc)heroLoc.textContent=c.siteLocation||'';
-  if(!(c.siteLocation))heroLoc.style.display='none';
+  var brandLoc=document.getElementById('brandLocation');
+  if(brandLoc)brandLoc.textContent=c.siteLocation||'';
   var koyTitle=document.getElementById('koyTitle');
   if(koyTitle)koyTitle.innerHTML=c.koyTitle||'';
   var koyText=document.getElementById('koyText');

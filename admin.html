@@ -178,9 +178,17 @@ button{font-family:inherit}
   <div class="login-box">
     <h2>Yönetim Paneli</h2>
     <p>Cumhuriyet Örnek Köy</p>
-    <input class="login-input" type="password" id="loginPass" placeholder="Parola" autocomplete="off">
-    <button class="login-btn" onclick="tryLogin()">Giriş Yap</button>
-    <div class="login-error" id="loginError">Parola yanlış, tekrar deneyin.</div>
+    <div id="loginStep1">
+      <input class="login-input" type="password" id="loginPass" placeholder="Parola" autocomplete="off">
+      <button class="login-btn" onclick="tryLoginStep1()">Devam</button>
+      <div class="login-error" id="loginError">Parola yanlış, tekrar deneyin.</div>
+    </div>
+    <div id="loginStep2" style="display:none">
+      <p style="font-size:.78rem;color:var(--dark-sec);margin-bottom:16px">Google Authenticator uygulamanızdaki 6 haneli kodu girin</p>
+      <input class="login-input" type="text" id="loginTotp" placeholder="000000" maxlength="6" autocomplete="one-time-code" inputmode="numeric" style="font-size:1.4rem;letter-spacing:.3em">
+      <button class="login-btn" onclick="tryLoginStep2()">Giriş Yap</button>
+      <div class="login-error" id="totpError">Kod yanlış, tekrar deneyin.</div>
+    </div>
   </div>
 </div>
 
@@ -220,6 +228,11 @@ button{font-family:inherit}
       <li><a data-panel="settings" onclick="switchPanel('settings',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         <span>Ayarlar</span>
+      </a></li>
+      <div class="sb-divider"></div>
+      <li><a onclick="exportSiteData()" style="cursor:pointer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span>Siteyi Yayınla</span>
       </a></li>
     </ul>
     <div class="sb-footer">
@@ -315,6 +328,19 @@ button{font-family:inherit}
           <input class="form-input" type="password" id="newPass2">
         </div>
         <button class="btn btn-primary" onclick="changePassword()">Parolayı Değiştir</button>
+      </div>
+      <div class="ce-section">
+        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> İki Faktörlü Doğrulama (2FA)</h3>
+        <div id="2faStatus"></div>
+      </div>
+      <div class="ce-section">
+        <h3>Siteyi Yayınla (Cloudflare)</h3>
+        <p style="font-size:.85rem;color:var(--text-sec);margin-bottom:12px">Fotoğraflar tarayıcınızda yerel olarak saklanır. Canlı sitede görünmeleri için verileri dışa aktarın.</p>
+        <p style="font-size:.82rem;color:var(--text-sec);margin-bottom:16px">Bu işlem fotoğrafları sıkıştırıp <strong>site-data.js</strong> dosyası oluşturur. Dosyayı website klasörüne kopyalayın ve <code>git push</code> yapın.</p>
+        <button class="btn btn-primary" onclick="exportSiteData()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          site-data.js İndir
+        </button>
       </div>
       <div class="ce-section">
         <h3>Verileri Sıfırla</h3>
@@ -420,25 +446,84 @@ function formatDate(ts){
   return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+/* ═══════════ TOTP 2FA ═══════════ */
+const TOTP_KEY='cok_totp_secret';
+function getTotpSecret(){return localStorage.getItem(TOTP_KEY);}
+function setTotpSecret(s){localStorage.setItem(TOTP_KEY,s);}
+function removeTotpSecret(){localStorage.removeItem(TOTP_KEY);}
+function is2FAEnabled(){return !!getTotpSecret();}
+
+function base32Encode(buffer){
+  const C='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  let bits='';const bytes=new Uint8Array(buffer);
+  for(let i=0;i<bytes.length;i++)bits+=bytes[i].toString(2).padStart(8,'0');
+  let r='';for(let i=0;i<bits.length;i+=5){r+=C[parseInt(bits.substr(i,5).padEnd(5,'0'),2)];}
+  return r;
+}
+function base32Decode(str){
+  const C='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  str=str.replace(/=+$/,'').toUpperCase();
+  let bits='';for(let i=0;i<str.length;i++){const v=C.indexOf(str[i]);if(v===-1)continue;bits+=v.toString(2).padStart(5,'0');}
+  const bytes=new Uint8Array(Math.floor(bits.length/8));
+  for(let i=0;i<bytes.length;i++)bytes[i]=parseInt(bits.substr(i*8,8),2);
+  return bytes.buffer;
+}
+function generateSecret(){return base32Encode(crypto.getRandomValues(new Uint8Array(20)).buffer);}
+
+async function generateTOTP(secret,timeOff){
+  const key=base32Decode(secret);
+  const time=Math.floor((Date.now()/1000+(timeOff||0))/30);
+  const cb=new ArrayBuffer(8);new DataView(cb).setUint32(4,time,false);
+  const ck=await crypto.subtle.importKey('raw',key,{name:'HMAC',hash:'SHA-1'},false,['sign']);
+  const sig=new Uint8Array(await crypto.subtle.sign('HMAC',ck,cb));
+  const off=sig[sig.length-1]&0x0f;
+  const code=((sig[off]&0x7f)<<24|sig[off+1]<<16|sig[off+2]<<8|sig[off+3])%1000000;
+  return String(code).padStart(6,'0');
+}
+async function verifyTOTP(secret,token){
+  for(const off of [0,-30,30]){if(await generateTOTP(secret,off)===token)return true;}
+  return false;
+}
+
 /* ═══════════ LOGIN ═══════════ */
 let isLoggedIn=false;
+let loginPassword='';
 const loginScreen=document.getElementById('loginScreen');
 const adminLayout=document.getElementById('adminLayout');
 
-function tryLogin(){
+function tryLoginStep1(){
   const pass=document.getElementById('loginPass').value;
   if(btoa(pass)===data.adminHash){
-    isLoggedIn=true;
-    loginScreen.classList.add('hidden');
-    adminLayout.classList.add('visible');
-    renderDashboard();
+    loginPassword=pass;
+    if(is2FAEnabled()){
+      document.getElementById('loginStep1').style.display='none';
+      document.getElementById('loginStep2').style.display='block';
+      document.getElementById('loginTotp').value='';
+      document.getElementById('loginTotp').focus();
+    }else{
+      completeLogin();
+    }
   }else{
     document.getElementById('loginError').style.display='block';
     document.getElementById('loginPass').value='';
     document.getElementById('loginPass').focus();
   }
 }
-document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin();});
+async function tryLoginStep2(){
+  const code=document.getElementById('loginTotp').value.trim();
+  if(code.length!==6||!/^\d{6}$/.test(code)){document.getElementById('totpError').style.display='block';return;}
+  const valid=await verifyTOTP(getTotpSecret(),code);
+  if(valid){completeLogin();}
+  else{document.getElementById('totpError').style.display='block';document.getElementById('loginTotp').value='';document.getElementById('loginTotp').focus();}
+}
+function completeLogin(){
+  isLoggedIn=true;loginPassword='';
+  loginScreen.classList.add('hidden');
+  adminLayout.classList.add('visible');
+  renderDashboard();
+}
+document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')tryLoginStep1();});
+document.getElementById('loginTotp').addEventListener('keydown',e=>{if(e.key==='Enter')tryLoginStep2();});
 
 function logout(){
   isLoggedIn=false;
@@ -446,6 +531,9 @@ function logout(){
   adminLayout.classList.remove('visible');
   document.getElementById('loginPass').value='';
   document.getElementById('loginError').style.display='none';
+  document.getElementById('loginStep1').style.display='block';
+  document.getElementById('loginStep2').style.display='none';
+  document.getElementById('totpError').style.display='none';
 }
 
 /* ═══════════ PANELS ═══════════ */
@@ -463,6 +551,7 @@ function switchPanel(id,el){
   if(id==='news')renderNews();
   if(id==='timeline')renderTimeline();
   if(id==='content')renderContentEditor();
+  if(id==='settings')render2FASettings();
 }
 
 /* ═══════════ DASHBOARD ═══════════ */
@@ -1078,6 +1167,112 @@ function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+/* ═══════════ 2FA SETTINGS ═══════════ */
+let pending2FASecret='';
+function render2FASettings(){
+  const c=document.getElementById('2faStatus');
+  if(!c)return;
+  if(is2FAEnabled()){
+    c.innerHTML=`
+      <p style="font-size:.85rem;color:var(--green);margin-bottom:16px;display:flex;align-items:center;gap:8px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;flex-shrink:0"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <strong>2FA Aktif</strong> — Google Authenticator ile korunuyor.
+      </p>
+      <div class="form-group">
+        <label>Devre dışı bırakmak için mevcut 6 haneli kodu girin</label>
+        <input class="form-input" type="text" id="disable2faCode" placeholder="000000" maxlength="6" inputmode="numeric" style="max-width:200px;font-size:1.1rem;letter-spacing:.15em">
+      </div>
+      <button class="btn btn-danger" onclick="disable2FA()">2FA'yı Devre Dışı Bırak</button>
+    `;
+  }else{
+    c.innerHTML=`
+      <p style="font-size:.85rem;color:var(--text-sec);margin-bottom:16px">
+        İki faktörlü doğrulama aktif değil. Google Authenticator ile hesabınızı koruyun.
+      </p>
+      <button class="btn btn-primary" onclick="setup2FA()">2FA'yı Etkinleştir</button>
+    `;
+  }
+}
+function setup2FA(){
+  pending2FASecret=generateSecret();
+  const c=document.getElementById('2faStatus');
+  c.innerHTML=`
+    <div style="background:var(--accent-bg);border:1px solid var(--accent);border-radius:var(--radius);padding:20px;margin-bottom:16px">
+      <p style="font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:12px">2FA Kurulumu</p>
+      <p style="font-size:.82rem;color:var(--text-sec);margin-bottom:16px">Google Authenticator uygulamanızı açın → <strong>+</strong> → <strong>Kurulum anahtarı girin</strong></p>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:12px">
+        <p style="font-size:.72rem;color:var(--text-sec);margin-bottom:4px">Hesap Adı</p>
+        <p style="font-size:.88rem;font-weight:600;color:var(--text)">Cumhuriyet Köy Admin</p>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:12px">
+        <p style="font-size:.72rem;color:var(--text-sec);margin-bottom:4px">Gizli Anahtar (bu kodu uygulamaya girin)</p>
+        <p style="font-size:.82rem;font-weight:700;color:var(--accent);letter-spacing:.08em;font-family:monospace;word-break:break-all">${pending2FASecret}</p>
+      </div>
+      <p style="font-size:.78rem;color:var(--text-sec);margin-bottom:4px">Tür: <strong>Zamana dayalı (TOTP)</strong></p>
+      <p style="font-size:.82rem;color:var(--text-sec);margin:16px 0 12px">Anahtarı ekledikten sonra uygulamada görünen 6 haneli kodu girin:</p>
+      <div class="form-group">
+        <input class="form-input" type="text" id="verify2faCode" placeholder="000000" maxlength="6" inputmode="numeric" style="max-width:200px;font-size:1.1rem;letter-spacing:.15em">
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-primary" onclick="verify2FASetup()">Doğrula ve Etkinleştir</button>
+        <button class="btn btn-ghost" onclick="render2FASettings()">İptal</button>
+      </div>
+    </div>
+  `;
+}
+async function verify2FASetup(){
+  const code=document.getElementById('verify2faCode').value.trim();
+  if(!pending2FASecret||code.length!==6||!/^\d{6}$/.test(code)){showToast('Lütfen 6 haneli kodu girin.');return;}
+  const valid=await verifyTOTP(pending2FASecret,code);
+  if(valid){setTotpSecret(pending2FASecret);pending2FASecret='';showToast('2FA başarıyla etkinleştirildi!');render2FASettings();}
+  else{showToast('Kod yanlış. Lütfen uygulamadaki güncel kodu girin.');}
+}
+async function disable2FA(){
+  const code=document.getElementById('disable2faCode').value.trim();
+  if(code.length!==6||!/^\d{6}$/.test(code)){showToast('Lütfen 6 haneli kodu girin.');return;}
+  const valid=await verifyTOTP(getTotpSecret(),code);
+  if(valid){removeTotpSecret();showToast('2FA devre dışı bırakıldı.');render2FASettings();}
+  else{showToast('Kod yanlış.');}
+}
+
+/* ═══════════ EXPORT SITE DATA ═══════════ */
+async function exportSiteData(){
+  showToast('Veriler hazırlanıyor...');
+  try{
+    const exportData=JSON.parse(JSON.stringify(data));
+    for(let p of exportData.photos){
+      if(p.file){try{const blob=await getPhotoBlob(p.file);if(blob){p.src=await resizeAndEncode(blob,1600,.8);p.file='';}}catch(e){}}
+    }
+    if(exportData.content.ataturkPhotos){
+      for(let p of exportData.content.ataturkPhotos){
+        if(p.file){try{const blob=await getPhotoBlob(p.file);if(blob){p.src=await resizeAndEncode(blob,1600,.8);p.file='';}}catch(e){}}
+      }
+    }
+    const js='window.SITE_DATA='+JSON.stringify(exportData)+';';
+    const blob=new Blob([js],{type:'application/javascript'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='site-data.js';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('site-data.js indirildi! Website klasörüne kopyalayın ve git push yapın.');
+  }catch(e){showToast('Dışa aktarma hatası: '+e.message);}
+}
+function resizeAndEncode(blobOrFile,maxW,quality){
+  return new Promise((resolve,reject)=>{
+    const b=blobOrFile instanceof Blob?blobOrFile:new Blob([blobOrFile]);
+    const img=new Image();
+    img.onload=function(){
+      let w=img.width,h=img.height;
+      if(w>maxW){h=Math.round(h*(maxW/w));w=maxW;}
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      resolve(c.toDataURL('image/jpeg',quality));
+    };
+    img.onerror=reject;
+    img.src=URL.createObjectURL(b);
+  });
 }
 </script>
 </body>
